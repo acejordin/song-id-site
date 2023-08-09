@@ -6,4 +6,5 @@ class ShazamResult {
     public string Title;
     public string Url;
     public int RetryMs;
+    public string ImageUrl;
 }

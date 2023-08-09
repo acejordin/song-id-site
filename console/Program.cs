@@ -32,8 +32,8 @@ class Program
 
                     if(result.Success) {
                         Console.CursorLeft = 0;
-                        Console.WriteLine(result.Url);
-                        Process.Start("explorer", result.Url);
+                        Console.WriteLine($"{result.Title} - {result.Artist} : {result.Url}");
+                        //Process.Start("explorer", result.Url);
                     } else {
                         Console.WriteLine(":(");
                     }
@@ -48,11 +48,11 @@ class Program
         var analysis = new Analysis();
         var finder = new LandmarkFinder(analysis);
 
-        using(var capture = new WasapiCapture(CaptureDevices.ToArray()[0])) {
+        using(var capture = new WasapiLoopbackCapture()) {
             var captureBuf = new BufferedWaveProvider(capture.WaveFormat) { ReadFully = false };
 
             capture.DataAvailable += (s, e) => {
-                captureBuf.AddSamples(e.Buffer, 0, e.BytesRecorded);
+                 captureBuf.AddSamples(e.Buffer, 0, e.BytesRecorded);
             };
 
             capture.StartRecording();

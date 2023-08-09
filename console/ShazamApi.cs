@@ -39,6 +39,7 @@ static class ShazamApi {
             result.Url = track.Value<string>("url");
             result.Title = track.Value<string>("title");
             result.Artist = track.Value<string>("subtitle");
+            result.ImageUrl = track.Value<JToken>("images").Value<string>("coverart");
         } else {
             result.RetryMs = obj.Value<int>("retryms");
         }
