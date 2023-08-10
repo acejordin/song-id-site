@@ -5,13 +5,14 @@ public class AudioRecorder : IDisposable
 {
     int _device, _handle;
 
-    public AudioRecorder(RecordingDevice Device)
+    public AudioRecorder(RecordingDevice Device, int Frequency, int Channels, int BitsPerSample)
     {
         _device = Device.Index;
 
         Bass.RecordInit(_device);
 
-        _handle = Bass.RecordStart(44100, 2, BassFlags.RecordPause, Procedure);
+        //_handle = Bass.RecordStart(44100, 2, BassFlags.RecordPause, Procedure);
+        _handle = Bass.RecordStart(Frequency, Channels, BassFlags.RecordPause, Procedure);
     }
 
     byte[] _buffer;

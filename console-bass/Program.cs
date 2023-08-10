@@ -2,22 +2,23 @@
 
 class Program
 {
-    static List<RecordingDevice> AvailableAudioSources { get; set; } = new List<RecordingDevice>();
     static void Main(string[] args)
     {
         Console.WriteLine("Select Audio Device");
 
-        AvailableAudioSources = RecordingDevice.Enumerate().ToList();
-        AvailableAudioSources.ForEach(src => Console.WriteLine($"[{src.Index}] {src.ToString()}"));
+        List<RecordingDevice> availableAudioSources = RecordingDevice.Enumerate().ToList();
+        availableAudioSources.ForEach(src => Console.WriteLine($"[{src.Index}] {src.ToString()}"));
 
-        Console.Write("Enter num: ");
-        var key = Console.ReadKey();
+        Console.Write("Enter num [0]: ");
+        int audIdx = Int32.Parse(Console.ReadLine() ?? "0");
+        RecordingDevice recordingDevice = availableAudioSources[audIdx];
+
         Console.WriteLine();
         Console.WriteLine("SPACE - tag, Q - quit");
 
         while (true)
         {
-            key = Console.ReadKey(true);
+            var key = Console.ReadKey(true);
 
             if (Char.ToLower(key.KeyChar).ToString().ToLower() == "q")
                 break;
@@ -28,7 +29,7 @@ class Program
 
                 try
                 {
-                    var result = CaptureAndTag();
+                    var result = CaptureAndTag(recordingDevice, sampleRate:16000, channels:1);
 
                     if (result.Success)
                     {
@@ -49,29 +50,29 @@ class Program
         }
     }
 
-    static ShazamResult CaptureAndTag()
+    static ShazamResult CaptureAndTag(RecordingDevice recordingDevice, int sampleRate = 44100, int channels = 2, int bitsPerSample = 16)
     {
         var analysis = new Analysis();
         var finder = new LandmarkFinder(analysis);
 
-        //using (var capture = new WasapiLoopbackCapture())
-        //{
-        //var captureBuf = new BufferedWaveProvider(capture.WaveFormat) { ReadFully = false };
+        AudioRecorder audioRecorder = new AudioRecorder(recordingDevice, sampleRate, channels, bitsPerSample);
 
-        //capture.DataAvailable += (s, e) => {
-        //    captureBuf.AddSamples(e.Buffer, 0, e.BytesRecorded);
-        //};
-        //capture.StartRecording();
+        string outFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MBass\\");
+        var filePath = Path.Combine(outFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".wav");
+        WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), new WaveFormat(sampleRate, bitsPerSample, channels));
 
-        //using (var resampler = new MediaFoundationResampler(captureBuf, new WaveFormat(Analysis.SAMPLE_RATE, 16, 1)))
-        //{
-        //var sampleProvider = resampler.ToSampleProvider();
+        audioRecorder.DataAvailable += (Buffer, Length) => waveFileWriter?.Write(Buffer, Length);
+        audioRecorder.Start();
 
+        var retryMs = 3000;
+        var tagId = Guid.NewGuid().ToString();
 
+        Thread.Sleep(5000);
 
+        audioRecorder.Stop();
+        audioRecorder?.Dispose();
 
-        //var retryMs = 3000;
-        //var tagId = Guid.NewGuid().ToString();
+        waveFileWriter?.Dispose();
 
         //while (true)
         //{
@@ -99,10 +100,5 @@ class Program
         //    }
         //}
         return new ShazamResult { Artist = "in the ambulance" };
-
-
-
-        //}
-        //}
     }
 }
