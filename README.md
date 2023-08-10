@@ -24,6 +24,8 @@ https://stackoverflow.com/questions/13793514/monodevelop-naudio-ubuntu-linux-tel
     * look into how songrec does this
     * see if can do this by extending naudio 
         * https://stackoverflow.com/questions/13793514/monodevelop-naudio-ubuntu-linux-tells-me-winmm-dll-not-found
+    * Alternative?: https://github.com/ManagedBass/ManagedBass
+        * ARM64 binaries for rpi https://www.un4seen.com/forum/?topic=13804 don't use softfp version, use hardfp, maybe aarch64
 * convert console app into library for website to consume
 * learn angular enough to get basic page working
 * how to run the site on raspi

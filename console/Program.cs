@@ -7,7 +7,7 @@ class Program
     static IEnumerable<MMDevice> CaptureDevices { get; set; }
     static void Main(string[] args)
     {
-        Console.WriteLine("SPACE - tag, E - Enumerate Audio Devices, Q - quit");
+        Console.WriteLine("SPACE - tag, Q - quit");
 
         while(true) {
             var key = Console.ReadKey(true);
@@ -15,14 +15,8 @@ class Program
             var enumerator = new MMDeviceEnumerator();
             CaptureDevices = enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active).ToArray();
 
-            if(Char.ToLower(key.KeyChar) == 'q')
+            if(Char.ToLower(key.KeyChar).ToString().ToLower() == "q")
                 break;
-            if(Char.ToLower(key.KeyChar) == 'e')
-            {
-                //var enumerator = new MMDeviceEnumerator();
-                //var captureEndpoints = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToArray();
-                var allEndpoints = enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active).ToArray();
-            }
 
             if(key.Key == ConsoleKey.Spacebar) {
                 Console.Write("Listening... ");
@@ -72,9 +66,6 @@ class Program
                         finder.Find(analysis.StripeCount - LandmarkFinder.RADIUS_TIME - 1);
 
                     if(analysis.ProcessedMs >= retryMs) {
-                        //new Painter(analysis, finder).Paint("c:/temp/spectro.png");
-                        //new Synthback(analysis, finder).Synth("c:/temp/synthback.raw");
-
                         var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
                         var result = ShazamApi.SendRequest(tagId, analysis.ProcessedMs, sigBytes).GetAwaiter().GetResult();
                         if(result.Success)
