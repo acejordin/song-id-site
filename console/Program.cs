@@ -43,7 +43,9 @@ class Program
         var analysis = new Analysis();
         var finder = new LandmarkFinder(analysis);
 
-        using(var capture = new WasapiLoopbackCapture()) {
+        string outFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MBass\\");
+
+        using (var capture = new WasapiLoopbackCapture()) {
             var captureBuf = new BufferedWaveProvider(capture.WaveFormat) { ReadFully = false };
 
             capture.DataAvailable += (s, e) => {
@@ -56,10 +58,10 @@ class Program
                 var sampleProvider = resampler.ToSampleProvider();
                 var retryMs = 2000;
                 var tagId = Guid.NewGuid().ToString();
-                Int64 loop = 0;
+                //Int64 loop = 0;
                 while(true) {
-                    Trace.WriteLine($"Loop: {++loop}");
-                    Trace.WriteLine(captureBuf.BufferedDuration.TotalSeconds);
+                    //Trace.WriteLine($"Loop: {++loop}");
+                    //Trace.WriteLine(captureBuf.BufferedDuration.TotalSeconds);
                     while(captureBuf.BufferedDuration.TotalSeconds < 1)
                         Thread.Sleep(100);
 
@@ -68,10 +70,14 @@ class Program
                     if(analysis.StripeCount > 2 * LandmarkFinder.RADIUS_TIME)
                         finder.Find(analysis.StripeCount - LandmarkFinder.RADIUS_TIME - 1);
                     if(analysis.ProcessedMs >= retryMs) {
+                        new Painter(analysis, finder).Paint(Path.Combine(outFolder, $"{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}-spectro-naudio.png"));
+                        //new Synthback(analysis, finder).Synth("c:/temp/synthback.raw");
+                        //throw new Exception();
+
                         var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
                         Trace.WriteLine("Sending to Shazam...");
                         var result = ShazamApi.SendRequest(tagId, analysis.ProcessedMs, sigBytes).GetAwaiter().GetResult();
-                        Trace.WriteLine("Got result!");
+                        //Trace.WriteLine("Got result!");
                         if(result.Success)
                             return result;
 

@@ -1,4 +1,5 @@
 ﻿using ManagedBass;
+using System.Diagnostics;
 
 /// <summary>
 /// Like IWaveProvider, but makes it much simpler to put together a 32 bit floating
@@ -24,34 +25,53 @@ public interface ISampleProvider
 
 public class SampleProvider : ISampleProvider
 {
-    private List<float> _bufferFloat { get; set; } = new List<float>();
+    //private List<float> _bufferFloat { get; set; } = new List<float>();
+    private float[] _bufferFloat { get; set; }
+    private int _writePostionIdx = 0;
     private int _readPositionIdx = 0;
 
-    public void Write(List<float> buffer, int length)
+    private int _averageBytesPerSecond = 16000; //simplified in this case
+
+    public SampleProvider()
     {
-        throw new NotImplementedException();
+        _bufferFloat = new float[_averageBytesPerSecond * 30]; //30 second buffer
+    }
+
+    public TimeSpan BufferedDuration 
+    { 
+        get
+        {
+            //This is hard coded to assume the audio stream is 16000hz 32 bit mono.
+            int channels = 1;
+            //int bitsPerSample = 32;
+            int sampleRate = 16000;
+            //short blockAlign = (short)(channels * (bitsPerSample / 8));
+            short blockAlign = (short)channels;
+            int averageBytesPerSecond = sampleRate * blockAlign;
+
+            TimeSpan bufferedDuration = TimeSpan.FromSeconds((_writePostionIdx - _readPositionIdx) / (double)averageBytesPerSecond);
+            Trace.WriteLine($"BufferedDuration: {bufferedDuration.TotalSeconds} secs");
+            return bufferedDuration;
+        }
     }
 
     public void Write(float[] buffer, int length)
     {
-        for(int i = 0; i < buffer.Length; i++)
-        {
-            _bufferFloat.Add(buffer[i]);
-        }
+        Array.Copy(buffer, 0, _bufferFloat, _writePostionIdx, buffer.Length);
+        _writePostionIdx += buffer.Length;
     }
 
-    public WaveFormat WaveFormat => throw new NotImplementedException();
+    /// <summary>
+    /// Not implemented because it isn't needed by Analysis.ReadChunk()
+    /// </summary>
+    //public WaveFormat WaveFormat => throw new NotImplementedException();
+    public WaveFormat WaveFormat => WaveFormat.CreateIeeeFloat(16000, 1);
 
     public int Read(float[] buffer, int offset, int count)
     {
-        int outIdx = offset;
-        for (int i = 0; i < count; i++)
-        {
-            if (i + offset > _bufferFloat.Count - 1)
-                break;
-
-            buffer[outIdx++] = _bufferFloat[_readPositionIdx++];
-        }
-        return count;
+        int toRead = Math.Min(count, _writePostionIdx - _readPositionIdx);
+        Array.Copy(_bufferFloat, _readPositionIdx, buffer, offset, toRead);
+        _readPositionIdx += toRead;
+        return toRead;
     }
 }
