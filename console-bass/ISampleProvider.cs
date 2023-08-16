@@ -21,3 +21,37 @@ public interface ISampleProvider
     /// <returns>the number of samples written to the buffer.</returns>
     int Read(float[] buffer, int offset, int count);
 }
+
+public class SampleProvider : ISampleProvider
+{
+    private List<float> _bufferFloat { get; set; } = new List<float>();
+    private int _readPositionIdx = 0;
+
+    public void Write(List<float> buffer, int length)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Write(float[] buffer, int length)
+    {
+        for(int i = 0; i < buffer.Length; i++)
+        {
+            _bufferFloat.Add(buffer[i]);
+        }
+    }
+
+    public WaveFormat WaveFormat => throw new NotImplementedException();
+
+    public int Read(float[] buffer, int offset, int count)
+    {
+        int outIdx = offset;
+        for (int i = 0; i < count; i++)
+        {
+            if (i + offset > _bufferFloat.Count - 1)
+                break;
+
+            buffer[outIdx++] = _bufferFloat[_readPositionIdx++];
+        }
+        return count;
+    }
+}

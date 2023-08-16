@@ -1,10 +1,8 @@
-﻿using System;
-
-class ShazamResult {
-    public bool Success;
-    public string Artist;
-    public string Title;
-    public string Url;
-    public int RetryMs;
-    public string ImageUrl;
+﻿class ShazamResult {
+    public bool Success { get; set; } = false;
+    public string Artist { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Url { get; set; } = string.Empty;
+    public int RetryMs { get; set; } = 0;
+    public string ImageUrl { get; set; } = string.Empty;
 }

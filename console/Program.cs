@@ -39,6 +39,7 @@ class Program
     }
 
     static ShazamResult CaptureAndTag() {
+        Trace.WriteLine("Starting Capture...");
         var analysis = new Analysis();
         var finder = new LandmarkFinder(analysis);
 
@@ -53,10 +54,12 @@ class Program
 
             using(var resampler = new MediaFoundationResampler(captureBuf, new WaveFormat(Analysis.SAMPLE_RATE, 16, 1))) {
                 var sampleProvider = resampler.ToSampleProvider();
-                var retryMs = 3000;
+                var retryMs = 2000;
                 var tagId = Guid.NewGuid().ToString();
-
+                Int64 loop = 0;
                 while(true) {
+                    Trace.WriteLine($"Loop: {++loop}");
+                    Trace.WriteLine(captureBuf.BufferedDuration.TotalSeconds);
                     while(captureBuf.BufferedDuration.TotalSeconds < 1)
                         Thread.Sleep(100);
 
@@ -64,10 +67,11 @@ class Program
 
                     if(analysis.StripeCount > 2 * LandmarkFinder.RADIUS_TIME)
                         finder.Find(analysis.StripeCount - LandmarkFinder.RADIUS_TIME - 1);
-
                     if(analysis.ProcessedMs >= retryMs) {
                         var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
+                        Trace.WriteLine("Sending to Shazam...");
                         var result = ShazamApi.SendRequest(tagId, analysis.ProcessedMs, sigBytes).GetAwaiter().GetResult();
+                        Trace.WriteLine("Got result!");
                         if(result.Success)
                             return result;
 

@@ -36,10 +36,10 @@ static class ShazamApi {
 
         if(track != null) {
             result.Success = true;
-            result.Url = track.Value<string>("url");
-            result.Title = track.Value<string>("title");
-            result.Artist = track.Value<string>("subtitle");
-            result.ImageUrl = track.Value<JToken>("images").Value<string>("coverart");
+            result.Url = track.Value<string>("url") ?? string.Empty;
+            result.Title = track.Value<string>("title") ?? string.Empty;
+            result.Artist = track.Value<string>("subtitle") ?? string.Empty;
+            result.ImageUrl = track.Value<JToken>("images")?.Value<string>("coverart") ?? string.Empty;
         } else {
             result.RetryMs = obj.Value<int>("retryms");
         }

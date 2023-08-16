@@ -1,1 +1,1 @@
-﻿public delegate void DataAvailableHandler(byte[] Buffer, int Length);
+﻿public delegate void DataAvailableHandler(float[] Buffer, int Length);

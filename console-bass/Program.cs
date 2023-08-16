@@ -29,7 +29,7 @@ class Program
 
                 try
                 {
-                    var result = CaptureAndTag(recordingDevice, sampleRate:16000, channels:1);
+                    var result = CaptureAndTag(recordingDevice, sampleRate:16000, channels:1, bitsPerSample:32);
 
                     if (result.Success)
                     {
@@ -55,50 +55,61 @@ class Program
         var analysis = new Analysis();
         var finder = new LandmarkFinder(analysis);
 
-        AudioRecorder audioRecorder = new AudioRecorder(recordingDevice, sampleRate, channels, bitsPerSample);
-
         string outFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MBass\\");
         var filePath = Path.Combine(outFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".wav");
-        WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), new WaveFormat(sampleRate, bitsPerSample, channels));
 
-        audioRecorder.DataAvailable += (Buffer, Length) => waveFileWriter?.Write(Buffer, Length);
-        audioRecorder.Start();
+        using (WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), new WaveFormat(sampleRate, bitsPerSample, channels)))
+        using (AudioRecorder audioRecorder = new AudioRecorder(recordingDevice, sampleRate, channels, bitsPerSample))
+        {
+            SampleProvider sampleProvider = new SampleProvider();
+            audioRecorder.DataAvailable += (Buffer, Length) =>
+            {
+                for (int i = 0; i < Buffer.Length; i++){ Buffer[i] = Buffer[i] * 0.5f; }
+                waveFileWriter?.Write(Buffer, Length);
+                sampleProvider.Write(Buffer, Length);
+            };
+            audioRecorder.Start();
 
-        var retryMs = 3000;
-        var tagId = Guid.NewGuid().ToString();
+            var retryMs = 3000;
+            var tagId = Guid.NewGuid().ToString();
 
-        Thread.Sleep(5000);
+            //Thread.Sleep(5000);
 
-        audioRecorder.Stop();
-        audioRecorder?.Dispose();
+            //audioRecorder.Stop();
+            Thread.Sleep(5000);
+            try
+            {
+                while (true)
+                {
+                    //    while (captureBuf.BufferedDuration.TotalSeconds < 1)
+                    //        Thread.Sleep(100);
 
-        waveFileWriter?.Dispose();
 
-        //while (true)
-        //{
-        //    while (captureBuf.BufferedDuration.TotalSeconds < 1)
-        //        Thread.Sleep(100);
+                    analysis.ReadChunk(sampleProvider);
 
-        //    analysis.ReadChunk(sampleProvider);
+                    if (analysis.StripeCount > 2 * LandmarkFinder.RADIUS_TIME)
+                        finder.Find(analysis.StripeCount - LandmarkFinder.RADIUS_TIME - 1);
 
-        //    if (analysis.StripeCount > 2 * LandmarkFinder.RADIUS_TIME)
-        //        finder.Find(analysis.StripeCount - LandmarkFinder.RADIUS_TIME - 1);
+                    if (analysis.ProcessedMs >= retryMs)
+                    {
+                        var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
 
-        //    if (analysis.ProcessedMs >= retryMs)
-        //    {
-        //        //new Painter(analysis, finder).Paint("c:/temp/spectro.png");
-        //        //new Synthback(analysis, finder).Synth("c:/temp/synthback.raw");
+                        //return new ShazamResult { Artist = "in the ambulance" };
 
-        //        var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
-        //        var result = ShazamApi.SendRequest(tagId, analysis.ProcessedMs, sigBytes).GetAwaiter().GetResult();
-        //        if (result.Success)
-        //            return result;
+                        var result = ShazamApi.SendRequest(tagId, analysis.ProcessedMs, sigBytes).GetAwaiter().GetResult();
+                        if (result.Success)
+                            return result;
 
-        //        retryMs = result.RetryMs;
-        //        if (retryMs == 0)
-        //            return result;
-        //    }
-        //}
-        return new ShazamResult { Artist = "in the ambulance" };
+                        retryMs = result.RetryMs;
+                        if (retryMs == 0)
+                            return result;
+                    }
+                }
+            }
+            finally
+            {
+                audioRecorder.Stop();
+            }
+        }
     }
 }
