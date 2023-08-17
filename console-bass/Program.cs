@@ -92,8 +92,9 @@ class Program
 
                     //once there is enough audio process send to Shazam
                     if (analysis.ProcessedMs >= retryMs)
-                     {
-                        Trace.WriteLine($"ProcessedMs: {analysis.ProcessedMs}");
+                    {
+                        Trace.WriteLine($"analysis.ProcessedMs: {analysis.ProcessedMs}");
+
                         new Painter(analysis, finder).Paint(Path.Combine(outFolder, $"{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}-spectro-bass.png"));
 
                         var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
@@ -105,9 +106,9 @@ class Program
                         if (result.Success)
                             return result;
 
-                        Trace.WriteLine($"ShazamResult RetryMs: {result.RetryMs}");
                         retryMs = result.RetryMs;
-                        if (retryMs == 0)
+                        Trace.WriteLine($"ShazamResult.RetryMs: {result.RetryMs}");
+                        if (result.RetryMs == 0)
                             return result;
                     }
                 }
