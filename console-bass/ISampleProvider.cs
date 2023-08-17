@@ -34,7 +34,7 @@ public class SampleProvider : ISampleProvider
 
     public SampleProvider()
     {
-        _bufferFloat = new float[_averageBytesPerSecond * 30]; //30 second buffer
+        _bufferFloat = new float[_averageBytesPerSecond * 20]; //20 second buffer
     }
 
     public TimeSpan BufferedDuration 
@@ -50,7 +50,7 @@ public class SampleProvider : ISampleProvider
             int averageBytesPerSecond = sampleRate * blockAlign;
 
             TimeSpan bufferedDuration = TimeSpan.FromSeconds((_writePostionIdx - _readPositionIdx) / (double)averageBytesPerSecond);
-            Trace.WriteLine($"BufferedDuration: {bufferedDuration.TotalSeconds} secs");
+            //Trace.WriteLine($"BufferedDuration: {bufferedDuration.TotalSeconds} secs");
             return bufferedDuration;
         }
     }
