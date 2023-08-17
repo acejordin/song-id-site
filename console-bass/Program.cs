@@ -60,7 +60,7 @@ class Program
         var filePath = Path.Combine(outFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".wav");
 
         using (WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), WaveFormat.CreateIeeeFloat(sampleRate, channels)))
-        using (AudioRecorder audioRecorder = new AudioRecorder(recordingDevice, sampleRate, channels, bitsPerSample))
+        using (AudioRecorder audioRecorder = new AudioRecorder(recordingDevice, sampleRate, channels))
         {
             SampleProvider sampleProvider = new SampleProvider();
             audioRecorder.DataAvailable += (Buffer, Length) =>
@@ -100,7 +100,7 @@ class Program
                         var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
                         //throw new Exception();
 
-                        Trace.WriteLine($"Sending to Shazam!");
+                        Trace.WriteLine("Sending to Shazam...");
                         var result = ShazamApi.SendRequest(tagId, analysis.ProcessedMs, sigBytes).GetAwaiter().GetResult();
                         if (result.Success)
                             return result;
@@ -111,10 +111,6 @@ class Program
                             return result;
                     }
                 }
-            }
-            catch(Exception)
-            {
-                throw;
             }
             finally
             {

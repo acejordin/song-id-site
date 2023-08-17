@@ -22,8 +22,13 @@ class Painter {
             for(var x = 0; x < w; x++) {
                 for(var y = 0; y < h; y++) {
                     var magnitudeSquared = Analysis.GetMagnitudeSquared(x, y);
-                    var shade = Convert.ToByte(255 * MathF.Pow(magnitudeSquared / maxMagnitudeSquared, gamma / 2));
-                    bitmap.SetPixel(x, h - y - 1, Color.FromArgb(shade, shade, shade));
+                    try 
+                    {
+                        if (maxMagnitudeSquared == 0) { bitmap.SetPixel(x, h - y - 1, Color.Red); continue; }
+                        var shade = Convert.ToByte(255 * MathF.Pow(magnitudeSquared / maxMagnitudeSquared, gamma / 2)); 
+                        bitmap.SetPixel(x, h - y - 1, Color.FromArgb(shade, shade, shade));
+                    }
+                    catch(OverflowException oe) { bitmap.SetPixel(x, h - y - 1, Color.Red); }
                 }
             }
 
