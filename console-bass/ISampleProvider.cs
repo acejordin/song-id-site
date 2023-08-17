@@ -25,12 +25,11 @@ public interface ISampleProvider
 
 public class SampleProvider : ISampleProvider
 {
-    //private List<float> _bufferFloat { get; set; } = new List<float>();
-    private float[] _bufferFloat { get; set; }
+    private byte[] _buffer { get; set; }
     private int _writePostionIdx = 0;
     private int _readPositionIdx = 0;
 
-    private int _averageBytesPerSecond = 16000; //simplified in this case
+    private int _averageBytesPerSecond = 16000 * 2; //simplified in this case, 16000hz sample rate, 16bit audio, so 2 bytes per sample
 
     public SampleProvider()
     {
@@ -41,12 +40,12 @@ public class SampleProvider : ISampleProvider
     { 
         get
         {
-            //This is hard coded to assume the audio stream is 16000hz 32 bit mono.
+            //This is hard coded to assume the audio stream is 16000hz 16 bit mono.
             int channels = 1;
-            //int bitsPerSample = 32;
+            int bitsPerSample = 16;
             int sampleRate = 16000;
-            //short blockAlign = (short)(channels * (bitsPerSample / 8));
-            short blockAlign = (short)channels;
+            short blockAlign = (short)(channels * (bitsPerSample / 8));
+            //short blockAlign = (short)channels;
             int averageBytesPerSecond = sampleRate * blockAlign;
 
             TimeSpan bufferedDuration = TimeSpan.FromSeconds((_writePostionIdx - _readPositionIdx) / (double)averageBytesPerSecond);
@@ -55,23 +54,29 @@ public class SampleProvider : ISampleProvider
         }
     }
 
-    public void Write(float[] buffer, int length)
+    public void Write(byte[] buffer, int length)
     {
-        Array.Copy(buffer, 0, _bufferFloat, _writePostionIdx, buffer.Length);
+        Array.Copy(buffer, 0, _buffer, _writePostionIdx, buffer.Length);
         _writePostionIdx += buffer.Length;
     }
 
     /// <summary>
     /// Not implemented because it isn't needed by Analysis.ReadChunk()
     /// </summary>
-    //public WaveFormat WaveFormat => throw new NotImplementedException();
-    public WaveFormat WaveFormat => WaveFormat.CreateIeeeFloat(16000, 1);
+    public WaveFormat WaveFormat => throw new NotImplementedException();
+    //public WaveFormat WaveFormat => WaveFormat.CreateIeeeFloat(16000, 1);
 
     public int Read(float[] buffer, int offset, int count)
     {
-        int toRead = Math.Min(count, _writePostionIdx - _readPositionIdx);
-        Array.Copy(_bufferFloat, _readPositionIdx, buffer, offset, toRead);
-        _readPositionIdx += toRead;
-        return toRead;
+        int sourceBytesRequired = count * 2;
+        //EnsureSourceBuffer(sourceBytesRequired);
+        int bytesRead = Math.Min(sourceBytesRequired, _writePostionIdx - _readPositionIdx);
+        int outIndex = offset;
+        for (int n = 0; n < bytesRead; n += 2)
+        {
+            buffer[outIndex++] = BitConverter.ToInt16(_buffer, n + _readPositionIdx) / 32768f;
+        }
+        _readPositionIdx += sourceBytesRequired;
+        return bytesRead / 2;
     }
 }
