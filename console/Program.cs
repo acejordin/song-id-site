@@ -1,7 +1,6 @@
-﻿using System.Diagnostics;
-using Microsoft.VisualBasic;
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
+using System.Diagnostics;
 
 class Program
 {
