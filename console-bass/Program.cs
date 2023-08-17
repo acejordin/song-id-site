@@ -30,7 +30,7 @@ class Program
 
                 try
                 {
-                    var result = CaptureAndTag(recordingDevice, sampleRate:16000, channels:1, bitsPerSample:32);
+                    var result = CaptureAndTag(recordingDevice, sampleRate:16000, channels:1, bitsPerSample:16);
 
                     if (result.Success)
                     {
@@ -59,8 +59,8 @@ class Program
         string outFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MBass\\");
         var filePath = Path.Combine(outFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".wav");
 
-        using (WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), WaveFormat.CreateIeeeFloat(sampleRate, channels)))
-        using (AudioRecorder audioRecorder = new AudioRecorder(recordingDevice, sampleRate, channels, bitsPerSample))
+        using (WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), new WaveFormat(sampleRate, bitsPerSample, channels)))
+        using (AudioRecorder audioRecorder = new AudioRecorder(recordingDevice, sampleRate, channels))
         {
             SampleProvider sampleProvider = new SampleProvider();
             audioRecorder.DataAvailable += (Buffer, Length) =>
@@ -72,7 +72,7 @@ class Program
 
             audioRecorder.Start();
 
-            var retryMs = 3000;
+            var retryMs = 2000;
             var tagId = Guid.NewGuid().ToString();
 
             try
@@ -92,28 +92,25 @@ class Program
 
                     //once there is enough audio process send to Shazam
                     if (analysis.ProcessedMs >= retryMs)
-                    {
+                     {
+                        Trace.WriteLine($"ProcessedMs: {analysis.ProcessedMs}");
                         new Painter(analysis, finder).Paint(Path.Combine(outFolder, $"{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}-spectro-bass.png"));
 
                         var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
                         //throw new Exception();
 
-                        Trace.WriteLine($"Sending to Shazam!");
+                        Trace.WriteLine("Sending to Shazam...");
                         var result = ShazamApi.SendRequest(tagId, analysis.ProcessedMs, sigBytes).GetAwaiter().GetResult();
+                        //Trace.WriteLine("Got result!");
                         if (result.Success)
                             return result;
 
-                        retryMs += result.RetryMs;
-                        Trace.WriteLine($"Sleeping for {result.RetryMs}ms before retrying Shazam cuz Shazam said so");
-                        Thread.Sleep(result.RetryMs);
-                        if (result.RetryMs == 0)
+                        Trace.WriteLine($"ShazamResult RetryMs: {result.RetryMs}");
+                        retryMs = result.RetryMs;
+                        if (retryMs == 0)
                             return result;
                     }
                 }
-            }
-            catch(Exception)
-            {
-                throw;
             }
             finally
             {
