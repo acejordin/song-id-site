@@ -33,7 +33,7 @@ public class SampleProvider : ISampleProvider
 
     public SampleProvider()
     {
-        _bufferFloat = new float[_averageBytesPerSecond * 20]; //20 second buffer
+        _buffer = new byte[_averageBytesPerSecond * 30]; //30 second buffer
     }
 
     public TimeSpan BufferedDuration 
