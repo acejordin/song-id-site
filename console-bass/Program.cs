@@ -30,7 +30,7 @@ class Program
 
                 try
                 {
-                    var result = CaptureAndTag(recordingDevice, sampleRate:16000, channels:1, bitsPerSample:32);
+                    var result = CaptureAndTag(recordingDevice, sampleRate:16000, channels:1, bitsPerSample:16);
 
                     if (result.Success)
                     {
@@ -59,8 +59,8 @@ class Program
         string outFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MBass\\");
         var filePath = Path.Combine(outFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".wav");
 
-        using (WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), WaveFormat.CreateIeeeFloat(sampleRate, channels)))
-        using (AudioRecorder audioRecorder = new AudioRecorder(recordingDevice, sampleRate, channels, bitsPerSample))
+        using (WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), new WaveFormat(sampleRate, bitsPerSample, channels)))
+        using (AudioRecorder audioRecorder = new AudioRecorder(recordingDevice, sampleRate, channels))
         {
             SampleProvider sampleProvider = new SampleProvider();
             audioRecorder.DataAvailable += (Buffer, Length) =>
@@ -72,7 +72,7 @@ class Program
 
             audioRecorder.Start();
 
-            var retryMs = 3000;
+            var retryMs = 2000;
             var tagId = Guid.NewGuid().ToString();
 
             try
@@ -100,8 +100,9 @@ class Program
                         var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
                         //throw new Exception();
 
-                        Trace.WriteLine($"Sending to Shazam!");
+                        Trace.WriteLine("Sending to Shazam...");
                         var result = ShazamApi.SendRequest(tagId, analysis.ProcessedMs, sigBytes).GetAwaiter().GetResult();
+                        //Trace.WriteLine("Got result!");
                         if (result.Success)
                             return result;
 
@@ -111,10 +112,6 @@ class Program
                             return result;
                     }
                 }
-            }
-            catch(Exception)
-            {
-                throw;
             }
             finally
             {

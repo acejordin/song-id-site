@@ -5,7 +5,7 @@ public class AudioRecorder : IDisposable
 {
     int _device, _handle;
 
-    public AudioRecorder(RecordingDevice Device, int Frequency, int Channels, int BitsPerSample)
+    public AudioRecorder(RecordingDevice Device, int Frequency, int Channels)
     {
         _device = Device.Index;
 

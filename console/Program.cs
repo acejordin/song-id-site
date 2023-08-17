@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
+using System.Diagnostics;
 
 class Program
 {
@@ -47,6 +47,7 @@ class Program
 
         using (var capture = new WasapiLoopbackCapture()) {
             var captureBuf = new BufferedWaveProvider(capture.WaveFormat) { ReadFully = false };
+            //captureBuf.BufferLength = capture.WaveFormat.AverageBytesPerSecond * 30; //30 sec buffer
 
             capture.DataAvailable += (s, e) => {
                  captureBuf.AddSamples(e.Buffer, 0, e.BytesRecorded);
@@ -78,11 +79,11 @@ class Program
                         Trace.WriteLine("Sending to Shazam...");
                         var result = ShazamApi.SendRequest(tagId, analysis.ProcessedMs, sigBytes).GetAwaiter().GetResult();
                         //Trace.WriteLine("Got result!");
-                        if(result.Success)
+                        if (result.Success)
                             return result;
 
                         retryMs = result.RetryMs;
-                        if(retryMs == 0)
+                        if (retryMs == 0)
                             return result;
                     }
                 }
