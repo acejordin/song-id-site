@@ -1,10 +1,8 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.IntegralTransforms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-class Analysis {
+class Analysis
+{
     public const int SAMPLE_RATE = 16000;
     public const int CHUNKS_PER_SECOND = 125;
     public const int CHUNK_SIZE = SAMPLE_RATE / CHUNKS_PER_SECOND;
@@ -24,18 +22,21 @@ class Analysis {
 
     int WindowRingPos => ProcessedSamples % WINDOW_SIZE;
 
-    public void ReadChunk(ISampleProvider sampleProvider) {
-        if(sampleProvider.Read(WindowRing, WindowRingPos, CHUNK_SIZE) != CHUNK_SIZE)
+    public void ReadChunk(ISampleProvider sampleProvider)
+    {
+        if (sampleProvider.Read(WindowRing, WindowRingPos, CHUNK_SIZE) != CHUNK_SIZE)
             throw new Exception();
 
         ProcessedSamples += CHUNK_SIZE;
 
-        if(ProcessedSamples >= WINDOW_SIZE)
+        if (ProcessedSamples >= WINDOW_SIZE)
             AddStripe();
     }
 
-    void AddStripe() {
-        for(var i = 0; i < WINDOW_SIZE; i++) {
+    void AddStripe()
+    {
+        for (var i = 0; i < WINDOW_SIZE; i++)
+        {
             var waveRingIndex = (WindowRingPos + i) % WINDOW_SIZE;
             FFTBuf[i] = new Complex32(WindowRing[waveRingIndex] * HANN[i], 0);
         }
@@ -43,7 +44,8 @@ class Analysis {
         Fourier.Forward(FFTBuf, FourierOptions.NoScaling);
 
         var stripe = new float[BIN_COUNT];
-        for(var bin = 0; bin < BIN_COUNT; bin++) {
+        for (var bin = 0; bin < BIN_COUNT; bin++)
+        {
             // Used in official Shazam since 7.11.0
             // https://github.com/marin-m/SongRec/issues/10#issuecomment-731527377
             const int scaling = 2;
@@ -54,19 +56,23 @@ class Analysis {
         Stripes.Add(stripe);
     }
 
-    public float GetMagnitudeSquared(int stripe, int bin) {
+    public float GetMagnitudeSquared(int stripe, int bin)
+    {
         return Stripes[stripe][bin];
     }
 
-    public float FindMaxMagnitudeSquared() {
+    public float FindMaxMagnitudeSquared()
+    {
         return Stripes.Max(s => s.Max());
     }
 
-    public static int FreqToBin(float freq) {
+    public static int FreqToBin(float freq)
+    {
         return Convert.ToInt32(freq * WINDOW_SIZE / SAMPLE_RATE);
     }
 
-    public static float BinToFreq(float bin) {
+    public static float BinToFreq(float bin)
+    {
         return bin * SAMPLE_RATE / WINDOW_SIZE;
     }
 

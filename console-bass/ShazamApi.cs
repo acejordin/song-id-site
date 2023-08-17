@@ -2,17 +2,17 @@
 using Newtonsoft.Json.Linq;
 using System.Text;
 
-static class ShazamApi 
+static class ShazamApi
 {
     static private readonly HttpClient _httpClient = new HttpClient();
     static private readonly string INSTALLATION_ID = Guid.NewGuid().ToString();
 
-    static ShazamApi() 
+    static ShazamApi()
     {
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("curl/7");
     }
 
-    public static async Task<ShazamResult> SendRequest(string tagId, int samplems, byte[] sig) 
+    public static async Task<ShazamResult> SendRequest(string tagId, int samplems, byte[] sig)
     {
         var payload = new
         {
@@ -22,7 +22,7 @@ static class ShazamApi
                 samplems
             }
         };
-    
+
         var url = "https://amp.shazam.com/discovery/v5/en/US/android/-/tag/" + INSTALLATION_ID + "/" + tagId;
         var postData = new StringContent(
             JsonConvert.SerializeObject(payload),

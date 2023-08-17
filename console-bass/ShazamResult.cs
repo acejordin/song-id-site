@@ -1,4 +1,5 @@
-﻿class ShazamResult {
+﻿class ShazamResult
+{
     public bool Success { get; set; } = false;
     public string Artist { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;

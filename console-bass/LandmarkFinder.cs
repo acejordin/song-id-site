@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-class LandmarkFinder {
+﻿class LandmarkFinder
+{
     public const int
         RADIUS_TIME = 47,
         RADIUS_FREQ = 9;
@@ -23,7 +20,8 @@ class LandmarkFinder {
     readonly Analysis Analysis;
     readonly IReadOnlyList<List<LandmarkInfo>> Bands;
 
-    public LandmarkFinder(Analysis analysis) {
+    public LandmarkFinder(Analysis analysis)
+    {
         Analysis = analysis;
 
         Bands = Enumerable.Range(0, BAND_FREQS.Count - 1)
@@ -31,45 +29,52 @@ class LandmarkFinder {
             .ToList();
     }
 
-    public void Find(int stripe) {
-        for(var bin = MIN_BIN; bin < MAX_BIN; bin++) {
+    public void Find(int stripe)
+    {
+        for (var bin = MIN_BIN; bin < MAX_BIN; bin++)
+        {
 
-            if(Analysis.GetMagnitudeSquared(stripe, bin) < MIN_MAGN_SQUARED)
+            if (Analysis.GetMagnitudeSquared(stripe, bin) < MIN_MAGN_SQUARED)
                 continue;
 
-            if(!IsPeak(stripe, bin, RADIUS_TIME, 0))
+            if (!IsPeak(stripe, bin, RADIUS_TIME, 0))
                 continue;
 
-            if(!IsPeak(stripe, bin, 3, RADIUS_FREQ))
+            if (!IsPeak(stripe, bin, 3, RADIUS_FREQ))
                 continue;
 
             AddLandmarkAt(stripe, bin);
         }
     }
 
-    public IEnumerable<IEnumerable<LandmarkInfo>> EnumerateBandedLandmarks() {
+    public IEnumerable<IEnumerable<LandmarkInfo>> EnumerateBandedLandmarks()
+    {
         return Bands;
     }
 
-    public IEnumerable<LandmarkInfo> EnumerateAllLandmarks() {
+    public IEnumerable<LandmarkInfo> EnumerateAllLandmarks()
+    {
         return Bands.SelectMany(i => i);
     }
 
-    int GetBandIndex(float bin) {
+    int GetBandIndex(float bin)
+    {
         var freq = Analysis.BinToFreq(bin);
 
-        if(freq < BAND_FREQS[0])
+        if (freq < BAND_FREQS[0])
             return -1;
 
-        for(var i = 1; i < BAND_FREQS.Count; i++) {
-            if(freq < BAND_FREQS[i])
+        for (var i = 1; i < BAND_FREQS.Count; i++)
+        {
+            if (freq < BAND_FREQS[i])
                 return i - 1;
         }
 
         return -1;
     }
 
-    LandmarkInfo CreateLandmarkAt(int stripe, int bin) {
+    LandmarkInfo CreateLandmarkAt(int stripe, int bin)
+    {
         // Quadratic Interpolation of Spectral Peaks
         // https://stackoverflow.com/a/59140547
         // https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
@@ -90,38 +95,45 @@ class LandmarkFinder {
         );
     }
 
-    float GetLogMagnitude(int stripe, int bin) {
-        return 18 * 1024  * (1 - MathF.Log(Analysis.GetMagnitudeSquared(stripe, bin)) / LOG_MIN_MAGN_SQUARED);
+    float GetLogMagnitude(int stripe, int bin)
+    {
+        return 18 * 1024 * (1 - MathF.Log(Analysis.GetMagnitudeSquared(stripe, bin)) / LOG_MIN_MAGN_SQUARED);
     }
 
-    bool IsPeak(int stripe, int bin, int stripeRadius, int binRadius) {
+    bool IsPeak(int stripe, int bin, int stripeRadius, int binRadius)
+    {
         var center = Analysis.GetMagnitudeSquared(stripe, bin);
-        for(var s = -stripeRadius; s <= stripeRadius; s++) {
-            for(var b = -binRadius; b <= binRadius; b++) {
-                if(s == 0 && b == 0)
+        for (var s = -stripeRadius; s <= stripeRadius; s++)
+        {
+            for (var b = -binRadius; b <= binRadius; b++)
+            {
+                if (s == 0 && b == 0)
                     continue;
-                if(Analysis.GetMagnitudeSquared(stripe + s, bin + b) >= center)
+                if (Analysis.GetMagnitudeSquared(stripe + s, bin + b) >= center)
                     return false;
             }
         }
         return true;
     }
 
-    void AddLandmarkAt(int stripe, int bin) {
+    void AddLandmarkAt(int stripe, int bin)
+    {
         var newLandmark = CreateLandmarkAt(stripe, bin);
 
         var bandIndex = GetBandIndex(newLandmark.InterpolatedBin);
-        if(bandIndex < 0)
+        if (bandIndex < 0)
             return;
 
         var bandLandmarks = Bands[bandIndex];
 
-        if(bandLandmarks.Any()) {
+        if (bandLandmarks.Any())
+        {
             var capturedDuration = 1d / Analysis.CHUNKS_PER_SECOND * (stripe - bandLandmarks.First().StripeIndex);
             var allowedCount = 1 + capturedDuration * RATE;
-            if(bandLandmarks.Count > allowedCount) {
+            if (bandLandmarks.Count > allowedCount)
+            {
                 var pruneIndex = bandLandmarks.FindLastIndex(l => l.InterpolatedLogMagnitude < newLandmark.InterpolatedLogMagnitude);
-                if(pruneIndex < 0)
+                if (pruneIndex < 0)
                     return;
 
                 bandLandmarks.RemoveAt(pruneIndex);

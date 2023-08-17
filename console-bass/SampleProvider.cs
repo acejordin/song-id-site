@@ -1,5 +1,4 @@
 ﻿using ManagedBass;
-using System.Diagnostics;
 
 /// <summary>
 /// Like IWaveProvider, but makes it much simpler to put together a 32 bit floating
@@ -37,8 +36,8 @@ public class SampleProvider : ISampleProvider
         _bufferFloat = new float[_averageBytesPerSecond * 20]; //20 second buffer
     }
 
-    public TimeSpan BufferedDuration 
-    { 
+    public TimeSpan BufferedDuration
+    {
         get
         {
             //This is hard coded to assume the audio stream is 16000hz 32 bit mono.

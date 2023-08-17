@@ -30,7 +30,7 @@ class Program
 
                 try
                 {
-                    var result = CaptureAndTag(recordingDevice, sampleRate:16000, channels:1, bitsPerSample:32);
+                    var result = CaptureAndTag(recordingDevice, sampleRate: 16000, channels: 1, bitsPerSample: 32);
 
                     if (result.Success)
                     {
@@ -65,7 +65,7 @@ class Program
             SampleProvider sampleProvider = new SampleProvider();
             audioRecorder.DataAvailable += (Buffer, Length) =>
             {
-                for (int i = 0; i < Buffer.Length; i++){ Buffer[i] = Buffer[i]; }
+                for (int i = 0; i < Buffer.Length; i++) { Buffer[i] = Buffer[i]; }
                 waveFileWriter?.Write(Buffer, Length);
                 sampleProvider.Write(Buffer, Length);
             };
@@ -105,8 +105,11 @@ class Program
                         if (result.Success)
                             return result;
 
-                        retryMs = result.RetryMs;
+                        //RetryMs from Shazam means that is how much processed audio to send in next request, not how long to wait before retrying
+                        //Sending more than around 12 secs of processed audio to Spotify seems to cause Shazam to not identify the song
+                        retryMs = result.RetryMs; 
                         Trace.WriteLine($"ShazamResult.RetryMs: {result.RetryMs}");
+
                         if (result.RetryMs == 0)
                             return result;
                     }
