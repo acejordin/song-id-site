@@ -5,7 +5,7 @@
     "ng": "ng",
     "prestart": "node aspnetcore-https",
     "start": "run-script-os",
-    "start:windows": "ng serve --port 44470 --ssl --ssl-cert \"%APPDATA%\\ASP.NET\\https\\%npm_package_name%.pem\" --ssl-key \"%APPDATA%\\ASP.NET\\https\\%npm_package_name%.key\"",
+    "start:windows": "ng serve --port 44470 --ssl --ssl-cert \"%APPDATA%\\ASP.NET\\https\\%npm_package_name%.pem\" --ssl-key \"%APPDATA%\\ASP.NET\\https\\%npm_package_name%.key\" --host=127.0.0.1",
     "start:default": "ng serve --port 44470 --ssl --ssl-cert \"$HOME/.aspnet/https/${npm_package_name}.pem\" --ssl-key \"$HOME/.aspnet/https/${npm_package_name}.key\"",
     "build": "ng build",
     "build:ssr": "ng run song_id_site:server:dev",

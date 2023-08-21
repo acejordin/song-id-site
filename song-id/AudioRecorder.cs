@@ -11,6 +11,7 @@ public class AudioRecorder : IDisposable
 
         Bass.RecordInit(_device);
 
+        //_handle = Bass.RecordStart(44100, 2, BassFlags.RecordPause, Procedure);
         _handle = Bass.RecordStart(Frequency, Channels, BassFlags.RecordPause | BassFlags.Float, Procedure);
     }
 

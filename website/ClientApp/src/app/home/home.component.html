@@ -1,3 +1,5 @@
 <h1>Currently Playing</h1>
-<p>Let's get funky</p>
-<code>ClientApp</code>
+<div><h3>{{ shazamResult.title }} - {{ shazamResult.artist }}</h3></div>
+<div><img src="{{ shazamResult.imageUrl }}" alt="" /></div>
+<div><a href="{{ shazamResult.url }}">Shazam Link</a></div>
+<div>Detected Time: {{ shazamResult.detectedTime }}</div>

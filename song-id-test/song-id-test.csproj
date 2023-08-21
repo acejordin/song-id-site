@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace>song_id_test</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+    <PackageReference Include="coverlet.collector" Version="3.2.0" />
+  </ItemGroup>
+
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+    <Copy SourceFiles="..\lib\bassdlls\x86\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
+  </Target>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\song-id\song-id.csproj" />
+  </ItemGroup>
+
+</Project>
