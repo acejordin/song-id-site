@@ -17,6 +17,7 @@ which I used to actually get it working in .NET, with some tweaks
 ### Ongoing research links:
 
 https://stackoverflow.com/questions/13793514/monodevelop-naudio-ubuntu-linux-tells-me-winmm-dll-not-found
+https://medium.com/@niteshsinghal85/using-channels-for-asynchronous-queuing-in-c-ed96c51d4576
 
 ### Open issues
 
@@ -24,12 +25,27 @@ https://stackoverflow.com/questions/13793514/monodevelop-naudio-ubuntu-linux-tel
     * look into how songrec does this
     * see if can do this by extending naudio 
         * https://stackoverflow.com/questions/13793514/monodevelop-naudio-ubuntu-linux-tells-me-winmm-dll-not-found
-    * Alternative?: https://github.com/ManagedBass/ManagedBass
+    * [**THIS**] Alternative?: https://github.com/ManagedBass/ManagedBass
         * ARM64 binaries for rpi https://www.un4seen.com/forum/?topic=13804 don't use softfp version, use hardfp, maybe aarch64
-* convert console app into library for website to consume
+* [**DONE**] Convert console app into library for website to consume
 * learn angular enough to get basic page working
 * how to run the site on raspi
     * run via docker? 
         * https://hub.docker.com/_/microsoft-dotnet
         * https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/docker/building-net-docker-images?view=aspnetcore-7.0
-    
+        
+### TODO
+  
+* Improve the `SongIdService`
+  * Detect dead air and update result
+  * Store list of last `n` results
+  * Somehow signal listeners that a new song occurred
+    * Use System.Threading.Channels?
+  
+* Now Playing page improvements
+  * Display list of past results
+  * Add refresh link
+  * Eventually add auto-refresh when now playing changes
+  * Post request to icecast server to update metadata 
+    * [Icecast docs](https://icecast.org/docs/icecast-2.0.1/admin-interface.html)
+    * http://recordpi.local:8000//admin/metadata?mount=/mystream&mode=updinfo&song=ACDC+Back+In+Black

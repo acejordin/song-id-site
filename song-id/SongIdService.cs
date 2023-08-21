@@ -14,7 +14,7 @@ namespace song_id
         public SongIdService(ILogger<SongIdService> logger, IOptions<SongIdServiceOptions> options)
         {
             _logger = logger;
-            _songId = new SongId(new RecordingDevice(options.Value.RecordingDeviceIdx, "Device"));
+            _songId = new SongId(new RecordingDevice(options.Value.RecordingDeviceIdx, "Configured Output Device"), logger);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

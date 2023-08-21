@@ -1,4 +1,5 @@
 ﻿using ManagedBass;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Threading.Channels;
 
@@ -7,11 +8,14 @@ namespace song_id
     public class SongId
     {
         private RecordingDevice _recordingDevice;
+        private readonly ILogger _logger;
         private int _sampleRate;
         private int _channels;
-        public SongId(RecordingDevice recordingDevice, int sampleRate = 16000, int channels = 1)
+
+        public SongId(RecordingDevice recordingDevice, ILogger logger, int sampleRate = 16000, int channels = 1)
         {
             _recordingDevice = recordingDevice;
+            _logger = logger;
             _sampleRate = sampleRate;
             _channels = channels;
         }
@@ -63,14 +67,14 @@ namespace song_id
                         //once there is enough audio process send to Shazam
                         if (analysis.ProcessedMs >= retryMs)
                         {
-                            Trace.WriteLine($"analysis.ProcessedMs: {analysis.ProcessedMs}");
+                            _logger.LogInformation($"analysis.ProcessedMs: {analysis.ProcessedMs}");
 
                             new Painter(analysis, finder).Paint(Path.Combine(outFolder, $"{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}-spectro-bass.png"));
 
                             var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
                             //throw new Exception();
 
-                            Trace.WriteLine("Sending to Shazam...");
+                            _logger.LogInformation("Sending to Shazam...");
                             var result = await ShazamApi.SendRequestAsync(tagId, analysis.ProcessedMs, sigBytes, cancellationToken);
                             if (result.Success)
                                 return result;
@@ -78,7 +82,7 @@ namespace song_id
                             //RetryMs from Shazam means that is how much processed audio to send in next request, not how long to wait before retrying
                             //Sending more than around 12 secs of processed audio to Spotify seems to cause Shazam to not identify the song
                             retryMs = result.RetryMs;
-                            Trace.WriteLine($"ShazamResult.RetryMs: {result.RetryMs}");
+                            _logger.LogInformation($"ShazamResult.RetryMs: {result.RetryMs}");
 
                             if (result.RetryMs == 0)
                                 return result;
