@@ -14,19 +14,12 @@ namespace song_id
         public SongIdService(ILogger<SongIdService> logger, IOptions<SongIdServiceOptions> options)
         {
             _logger = logger;
-            _songId = new SongId(new RecordingDevice(options.Value.RecordingDeviceIdx, "Configured Output Device"), logger);
+            //_songId = new SongId(new RecordingDevice(options.Value.RecordingDeviceIdx, "Configured Output Device"), logger);
+            _songId = new SongId(new RecordingDevice(options.Value.RecordingDeviceName), logger);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //NowPlaying = new ShazamResult
-            //{
-            //    Artist = "Thrice",
-            //    Title = "Artist in the Ambulance",
-            //    Success = true,
-            //    ImageUrl = @"https://is4-ssl.mzstatic.com/image/thumb/Music116/v4/f5/cc/55/f5cc5594-0ab4-645f-d61a-c6d79d6b8a33/06UMGIM09833.rgb.jpg/400x400cc.jpg",
-            //    Url = "https://www.shazam.com/track/20115818/the-artist-in-the-ambulance"
-            //};
             while (!stoppingToken.IsCancellationRequested)
             {
                 await Task.Delay(10_000, stoppingToken);

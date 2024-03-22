@@ -6,11 +6,17 @@ public class RecordingDevice : IDisposable
 
     public int Index { get; }
 
-    public RecordingDevice(int Index, string Name)
+    public RecordingDevice(string name)
     {
-        this.Index = Index;
+        _name = name;
+        this.Index = RecordingDevice.Enumerate().First(rd => rd._name == name).Index;
+    }
 
-        _name = Name;
+    public RecordingDevice(int index, string name)
+    {
+        this.Index = index;
+
+        _name = name;
     }
 
     public static IEnumerable<RecordingDevice> Enumerate()
