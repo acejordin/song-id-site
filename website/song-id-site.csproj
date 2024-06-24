@@ -10,10 +10,14 @@
     <RootNamespace>song_id_site</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <UserSecretsId>d1ea309c-765a-468b-b6b6-706a5e676c79</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileRunArguments>-v \\wsl$\Ubuntu\mnt\wslg:/mnt/wslg/</DockerfileRunArguments>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="7.0.10" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +34,8 @@
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
     <Copy SourceFiles=".\lib\bassdlls\x86\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
     <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
+    <Copy SourceFiles=".\lib\bassdlls\x86\libbass.so" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x64\libbass.so" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
   </Target>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

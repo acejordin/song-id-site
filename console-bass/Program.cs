@@ -68,6 +68,8 @@ class Program
                 for (int i = 0; i < Buffer.Length; i++) { Buffer[i] = Buffer[i]; }
                 waveFileWriter?.Write(Buffer, Length);
                 sampleProvider.Write(Buffer, Length);
+                Debug.WriteLine($"DataAvailable() called");
+
             };
 
             audioRecorder.Start();

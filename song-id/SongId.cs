@@ -30,18 +30,20 @@ namespace song_id
             var analysis = new Analysis();
             var finder = new LandmarkFinder(analysis);
 
-            string outFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MBass\\");
+            //string outFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MBass\\");
+            string outFolder = "/app";
             var filePath = Path.Combine(outFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".wav");
 
-            using (WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), WaveFormat.CreateIeeeFloat(_sampleRate, _channels)))
+            //using (WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), WaveFormat.CreateIeeeFloat(_sampleRate, _channels)))
             using (AudioRecorder audioRecorder = new AudioRecorder(_recordingDevice, _sampleRate, _channels))
             {
                 SampleProvider sampleProvider = new SampleProvider();
                 audioRecorder.DataAvailable += (Buffer, Length) =>
                 {
                     for (int i = 0; i < Buffer.Length; i++) { Buffer[i] = Buffer[i]; }
-                    waveFileWriter?.Write(Buffer, Length);
+                    //waveFileWriter?.Write(Buffer, Length);
                     sampleProvider.Write(Buffer, Length);
+                    Debug.WriteLine($"DataAvailable() called");
                 };
 
                 audioRecorder.Start();
@@ -69,7 +71,7 @@ namespace song_id
                         {
                             _logger.LogInformation($"analysis.ProcessedMs: {analysis.ProcessedMs}");
 
-                            new Painter(analysis, finder).Paint(Path.Combine(outFolder, $"{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}-spectro-bass.png"));
+                            //new Painter(analysis, finder).Paint(Path.Combine(outFolder, $"{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}-spectro-bass.png"));
 
                             var sigBytes = Sig.Write(Analysis.SAMPLE_RATE, analysis.ProcessedSamples, finder);
                             //throw new Exception();
