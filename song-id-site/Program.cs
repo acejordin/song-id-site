@@ -1,6 +1,3 @@
-using song_id_site.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using song_id;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +5,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
 
 //bind config section with strongly typed class
 builder.Services.Configure<SongIdServiceOptions>(builder.Configuration.GetSection(nameof(SongIdServiceOptions)));

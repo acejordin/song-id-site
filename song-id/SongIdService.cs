@@ -24,8 +24,6 @@ namespace song_id
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(10_000, stoppingToken);
-                
                 var result = await _songId.CaptureAndTagAsync(stoppingToken);
 
                 if (result.Success && result.Title != NowPlaying.Title) _logger.LogInformation($"New track! {result}");
@@ -33,6 +31,8 @@ namespace song_id
 
                 NowPlaying = result;
                 SongChanged?.Invoke();
+
+                await Task.Delay(10_000, stoppingToken);
             }
         }
     }
