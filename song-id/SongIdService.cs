@@ -11,6 +11,8 @@ namespace song_id
 
         public ShazamResult NowPlaying { get; private set; } = new ShazamResult { Title = "Dead Air" };
 
+        public Action SongChanged { get; set; }
+
         public SongIdService(ILogger<SongIdService> logger, IOptions<SongIdServiceOptions> options)
         {
             _logger = logger;
@@ -30,6 +32,7 @@ namespace song_id
                 else if(!result.Success) _logger.LogError($"Failed Shazam request {result}");
 
                 NowPlaying = result;
+                SongChanged?.Invoke();
             }
         }
     }

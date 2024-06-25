@@ -1,18 +1,25 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;
 
-static class ShazamApi
+public class ShazamApi
 {
     static private readonly HttpClient _httpClient = new HttpClient();
     static private readonly string INSTALLATION_ID = Guid.NewGuid().ToString();
+    private readonly ILogger _logger;
 
     static ShazamApi()
     {
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("curl/7");
     }
 
-    public static async Task<ShazamResult> SendRequestAsync(string tagId, int samplems, byte[] sig, CancellationToken cancellationToken = default)
+    public ShazamApi(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task<ShazamResult> SendRequestAsync(string tagId, int samplems, byte[] sig, CancellationToken cancellationToken = default)
     {
         var payload = new
         {
@@ -43,6 +50,7 @@ static class ShazamApi
             result.Title = track.Value<string>("title") ?? string.Empty;
             result.Artist = track.Value<string>("subtitle") ?? string.Empty;
             result.ImageUrl = track.Value<JToken>("images")?.Value<string>("coverart") ?? string.Empty;
+            _logger.LogInformation($"Track returned: {result.Title} - {result.Artist}");
         }
         else
         {

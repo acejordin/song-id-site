@@ -1,6 +1,7 @@
 ﻿using ManagedBass;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Channels;
 
 namespace song_id
@@ -40,10 +41,22 @@ namespace song_id
                 SampleProvider sampleProvider = new SampleProvider();
                 audioRecorder.DataAvailable += (Buffer, Length) =>
                 {
-                    for (int i = 0; i < Buffer.Length; i++) { Buffer[i] = Buffer[i]; }
-                    //waveFileWriter?.Write(Buffer, Length);
-                    sampleProvider.Write(Buffer, Length);
-                    Debug.WriteLine($"DataAvailable() called");
+                    //Debug.WriteLine($"DataAvailable() called");
+                    float agg = Buffer.Aggregate((acc, x) => acc + x);
+                    float avg = agg / Buffer.Length;
+                    Debug.WriteLine($"Buffer average noise: {avg:0.###############}");
+
+                    if (avg < 0.000001 && avg > -0.000001)
+                    {
+                        Debug.WriteLine($"Think it's dead air: {avg:0.###############}");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Calling sampleProvider.Write()");
+                        for (int i = 0; i < Buffer.Length; i++) { Buffer[i] = Buffer[i]; }
+                        //waveFileWriter?.Write(Buffer, Length);
+                        sampleProvider.Write(Buffer, Length);
+                    }
                 };
 
                 audioRecorder.Start();
@@ -66,7 +79,7 @@ namespace song_id
                         if (analysis.StripeCount > 2 * LandmarkFinder.RADIUS_TIME)
                             finder.Find(analysis.StripeCount - LandmarkFinder.RADIUS_TIME - 1);
 
-                        //once there is enough audio process send to Shazam
+                        //once there is enough audio processed send to Shazam
                         if (analysis.ProcessedMs >= retryMs)
                         {
                             _logger.LogInformation($"analysis.ProcessedMs: {analysis.ProcessedMs}");
@@ -77,7 +90,7 @@ namespace song_id
                             //throw new Exception();
 
                             _logger.LogInformation("Sending to Shazam...");
-                            var result = await ShazamApi.SendRequestAsync(tagId, analysis.ProcessedMs, sigBytes, cancellationToken);
+                            var result = await new ShazamApi(_logger).SendRequestAsync(tagId, analysis.ProcessedMs, sigBytes, cancellationToken);
                             if (result.Success)
                                 return result;
 
