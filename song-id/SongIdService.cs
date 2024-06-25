@@ -11,7 +11,7 @@ namespace song_id
 
         public ShazamResult NowPlaying { get; private set; } = new ShazamResult { Title = "Dead Air" };
 
-        public Action SongChanged { get; set; }
+        public Action? SongChanged { get; set; }
 
         public SongIdService(ILogger<SongIdService> logger, IOptions<SongIdServiceOptions> options)
         {

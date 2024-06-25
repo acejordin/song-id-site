@@ -15,7 +15,7 @@ public class AudioRecorder : IDisposable
         _handle = Bass.RecordStart(Frequency, Channels, BassFlags.RecordPause | BassFlags.Float, Procedure);
     }
 
-    float[] _buffer;
+    float[]? _buffer;
 
     bool Procedure(int Handle, IntPtr Buffer, int Length, IntPtr User)
     {
@@ -29,7 +29,7 @@ public class AudioRecorder : IDisposable
         return true;
     }
 
-    public event DataAvailableHandler DataAvailable;
+    public event DataAvailableHandler? DataAvailable;
 
     public void Start()
     {

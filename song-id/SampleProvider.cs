@@ -24,7 +24,6 @@ public interface ISampleProvider
 
 public class SampleProvider : ISampleProvider
 {
-    //private List<float> _bufferFloat { get; set; } = new List<float>();
     private float[] _bufferFloat { get; set; }
     private int _writePostionIdx = 0;
     private int _readPositionIdx = 0;
@@ -63,8 +62,7 @@ public class SampleProvider : ISampleProvider
     /// <summary>
     /// Not implemented because it isn't needed by Analysis.ReadChunk()
     /// </summary>
-    //public WaveFormat WaveFormat => throw new NotImplementedException();
-    public WaveFormat WaveFormat => WaveFormat.CreateIeeeFloat(16000, 1);
+    public WaveFormat WaveFormat => throw new NotImplementedException();
 
     public int Read(float[] buffer, int offset, int count)
     {
