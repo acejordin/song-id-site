@@ -18,34 +18,51 @@ which I used to actually get it working in .NET, with some tweaks
 
 https://stackoverflow.com/questions/13793514/monodevelop-naudio-ubuntu-linux-tells-me-winmm-dll-not-found
 https://medium.com/@niteshsinghal85/using-channels-for-asynchronous-queuing-in-c-ed96c51d4576
+https://learn.microsoft.com/en-us/dotnet/core/docker/build-container?tabs=windows&pivots=dotnet-8-0
 
 ### Open issues
 
 * how to get audio on linux, naudio only supports windows
-    * look into how songrec does this
+    * [**DONE**]look into how songrec does this
     * see if can do this by extending naudio 
         * https://stackoverflow.com/questions/13793514/monodevelop-naudio-ubuntu-linux-tells-me-winmm-dll-not-found
     * [**THIS**] Alternative?: https://github.com/ManagedBass/ManagedBass
         * ARM64 binaries for rpi https://www.un4seen.com/forum/?topic=13804 don't use softfp version, use hardfp, maybe aarch64
 * [**DONE**] Convert console app into library for website to consume
-* learn angular enough to get basic page working
+* ~~learn angular enough to get basic page working~~ Using Blazor instead
 * how to run the site on raspi
-    * run via docker? 
+    * run via docker 
         * https://hub.docker.com/_/microsoft-dotnet
         * https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/docker/building-net-docker-images?view=aspnetcore-7.0
         
 ### TODO
+
+* More Docker support
+  * Docker Compose template, with var for setting default audio device, mapping audio device to container, icecast auth creds
+  * https://docs.linuxserver.io/general/docker-compose/
+  * https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-8.0#command-line for changing appsettings.json values from command line,
+    combine with Dockerfile ENTRYPOINT and CMD https://stackoverflow.com/questions/54654987/how-to-pass-command-line-arguments-to-a-dotnet-dll-in-a-docker-image-at-run-time
   
 * Improve the `SongIdService`
-  * Detect dead air and update result
+  * [**DONE**] Detect dead air and update result
   * Store list of last `n` results
-  * Somehow signal listeners that a new song occurred
-    * Use System.Threading.Channels?
+  * [**DONE**]Somehow signal listeners that a new song occurred
+    * ~~Use System.Threading.Channels?~~ Using Blazor and SignalR
   
 * Now Playing page improvements
   * Display list of past results
-  * Add refresh link
-  * Eventually add auto-refresh when now playing changes
-  * Post request to icecast server to update metadata 
+  * ~~Add refresh link~~
+  * [**DONE**] Eventually add auto-refresh when now playing changes
+  * GET request to icecast server to update metadata 
     * [Icecast docs](https://icecast.org/docs/icecast-2.0.1/admin-interface.html)
     * http://recordpi.local:8000//admin/metadata?mount=/mystream&mode=updinfo&song=ACDC+Back+In+Black
+    * Basic Authentication header needed
+
+### Install Steps (WORK IN PROGRESS)
+1. Install Docker on Raspberry Pi
+	* https://docs.docker.com/engine/install/debian/ (For 64-bit Raspberry Pi OS)
+2. Download the Docker Image TODO
+1. Modify Docker Compose template variables TODO
+1. Use Docker Compose template to run the container TODO
+1. Browse to site TODO
+
