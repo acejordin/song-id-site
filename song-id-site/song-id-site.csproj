@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>fec08348-dd09-48f8-b60d-76d920a5da28</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileRunArguments>-v \\wsl$\Ubuntu\mnt\wslg:/mnt/wslg/</DockerfileRunArguments>
   </PropertyGroup>
 
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
