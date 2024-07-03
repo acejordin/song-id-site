@@ -1,0 +1,29 @@
+﻿@page "/nowplaying"
+@using song_id
+@inject SongIdService songIdService
+@implements IDisposable
+
+<PageTitle>Now Playing</PageTitle>
+
+<h1>Now Playing</h1>
+
+<div><h3>@songIdService.NowPlaying.Title - @songIdService.NowPlaying.Artist</h3></div>
+<div><img src="@songIdService.NowPlaying.ImageUrl" alt="" /></div>
+<div><a href="@songIdService.NowPlaying.Url">Shazam Link</a></div>
+<div>Detected Time: @songIdService.NowPlaying.DetectedTime</div>
+
+@code {
+    Action? refreshNowPlaying;
+
+    protected override void OnInitialized()
+    {
+        refreshNowPlaying =  delegate() { InvokeAsync(this.StateHasChanged); };
+
+        songIdService.SongChanged += refreshNowPlaying;
+    }
+
+    public void Dispose()
+    {
+        songIdService.SongChanged -= refreshNowPlaying;
+    }
+}

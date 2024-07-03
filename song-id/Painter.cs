@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Runtime.Versioning;
 
+[SupportedOSPlatform("windows")]
 class Painter
 {
     readonly Analysis Analysis;

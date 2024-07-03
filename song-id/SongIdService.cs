@@ -11,6 +11,8 @@ namespace song_id
 
         public ShazamResult NowPlaying { get; private set; } = new ShazamResult { Title = "Dead Air" };
 
+        public Action? SongChanged { get; set; }
+
         public SongIdService(ILogger<SongIdService> logger, IOptions<SongIdServiceOptions> options)
         {
             _logger = logger;
@@ -22,14 +24,15 @@ namespace song_id
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(10_000, stoppingToken);
-                
                 var result = await _songId.CaptureAndTagAsync(stoppingToken);
 
                 if (result.Success && result.Title != NowPlaying.Title) _logger.LogInformation($"New track! {result}");
                 else if(!result.Success) _logger.LogError($"Failed Shazam request {result}");
 
                 NowPlaying = result;
+                SongChanged?.Invoke();
+
+                await Task.Delay(10_000, stoppingToken);
             }
         }
     }
