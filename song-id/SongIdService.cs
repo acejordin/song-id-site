@@ -7,16 +7,17 @@ namespace song_id
     public class SongIdService : BackgroundService
     {
         private readonly ILogger<SongIdService> _logger;
-        private readonly SongId _songId;
+        private SongId _songId;
 
         public ShazamResult NowPlaying { get; private set; } = new ShazamResult { Title = "Dead Air" };
 
         public Action? SongChanged { get; set; }
 
+        public SongId SongId { get { return _songId; } }
+
         public SongIdService(ILogger<SongIdService> logger, IOptions<SongIdServiceOptions> options)
         {
             _logger = logger;
-            //_songId = new SongId(new RecordingDevice(options.Value.RecordingDeviceIdx, "Configured Output Device"), logger);
             _songId = new SongId(new RecordingDevice(options.Value.RecordingDeviceName), logger);
         }
 

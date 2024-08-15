@@ -19,6 +19,7 @@ which I used to actually get it working in .NET, with some tweaks
 https://stackoverflow.com/questions/13793514/monodevelop-naudio-ubuntu-linux-tells-me-winmm-dll-not-found
 https://medium.com/@niteshsinghal85/using-channels-for-asynchronous-queuing-in-c-ed96c51d4576
 https://learn.microsoft.com/en-us/dotnet/core/docker/build-container?tabs=windows&pivots=dotnet-8-0
+https://devblogs.microsoft.com/dotnet/improving-multiplatform-container-support/
 
 ### Open issues
 

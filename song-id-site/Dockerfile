@@ -16,19 +16,31 @@ EXPOSE 443
 
 ENV PULSE_SERVER=/mnt/wslg/PulseServer
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+ARG BUILDPLATFORM
+ARG BUILDOS
+ARG BUILDARCH
+ARG BUILDVARIANT
+RUN echo "Building on $BUILDPLATFORM, targeting $TARGETPLATFORM"
+RUN echo "Building on ${BUILDOS} and ${BUILDARCH} with optional variant ${BUILDVARIANT}"
+RUN echo "Targeting ${TARGETOS} and ${TARGETARCH} with optional variant ${TARGETVARIANT}"
+
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["song-id-site/song-id-site.csproj", "song-id-site/"]
 COPY ["song-id/song-id.csproj", "song-id/"]
-RUN dotnet restore "./song-id-site/song-id-site.csproj"
+RUN dotnet restore -a $TARGETARCH "./song-id-site/song-id-site.csproj"
 COPY . .
 WORKDIR "/src/song-id-site"
 RUN dotnet build "./song-id-site.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./song-id-site.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./song-id-site.csproj" -a $TARGETARCH -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

@@ -12,6 +12,13 @@ namespace song_id
         private readonly ILogger _logger;
         private int _sampleRate;
         private int _channels;
+        private bool _recordingSourceChanged = false;
+
+        public string RecordingDeviceName 
+        { 
+            get { return _recordingDevice.ToString(); } 
+            set { _recordingDevice = new RecordingDevice(value); _recordingSourceChanged = true; }
+        }
 
         public SongId(RecordingDevice recordingDevice, ILogger logger, int sampleRate = 16000, int channels = 1)
         {
@@ -48,7 +55,7 @@ namespace song_id
 
                     if (avg < 0.000001 && avg > -0.000001)
                     {
-                        Debug.WriteLine($"Think it's dead air: {avg:0.###############}");
+                        Debug.WriteLine($"Think it's dead air");
                     }
                     else
                     {
@@ -70,7 +77,16 @@ namespace song_id
                     {
                         //don't start analyzing until there is at least a second of audio recorded
                         while (sampleProvider.BufferedDuration.TotalSeconds < 1)
+                        {
+                            if (cancellationToken.IsCancellationRequested || _recordingSourceChanged)
+                            {
+                                Debug.WriteLine($"Cancel Request: {cancellationToken.IsCancellationRequested}, Recording Source Changed: {_recordingSourceChanged}");
+                                _recordingSourceChanged = false;
+                                return new ShazamResult { Success = false };
+                            }
+
                             await Task.Delay(100, cancellationToken);
+                        }
 
                         //start reading in the audio to analyze
                         analysis.ReadChunk(sampleProvider);

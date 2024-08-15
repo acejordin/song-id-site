@@ -2,19 +2,29 @@
 
 public class RecordingDevice : IDisposable
 {
-    string _name;
+    string _name = "";
 
     public int Index { get; }
 
     public RecordingDevice(string name)
     {
-        _name = name;
-        this.Index = RecordingDevice.Enumerate().First(rd => rd._name == name).Index;
+        if (!string.IsNullOrEmpty(name))
+        {
+            _name = name;
+            Index = RecordingDevice.Enumerate().First(rd => rd._name == name).Index;
+        }
+        else if (RecordingDevice.Enumerate().Count() > 0)
+        {
+            _name = RecordingDevice.Enumerate().First()._name;
+            Index = 0; //Default o first audio device
+        }
+        else
+            throw new Exception("No audio devices enumerated");
     }
 
     public RecordingDevice(int index, string name)
     {
-        this.Index = index;
+        Index = index;
 
         _name = name;
     }
