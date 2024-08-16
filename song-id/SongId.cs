@@ -13,6 +13,7 @@ namespace song_id
         private int _sampleRate;
         private int _channels;
         private RecordingSourceChangedToken _recordingSourceChangedToken;
+        private int _deadAirLengthSecs;
 
         public string RecordingDeviceName 
         { 
@@ -20,12 +21,13 @@ namespace song_id
             set { _recordingDevice = new RecordingDevice(value); _recordingSourceChangedToken.IsRecordingSourceChanged = true; }
         }
 
-        public SongId(RecordingDevice recordingDevice, ILogger logger, int sampleRate = 16000, int channels = 1)
+        public SongId(RecordingDevice recordingDevice, ILogger logger, int sampleRate = 16000, int channels = 1, int deadAirLengthSecs = 10)
         {
             _recordingDevice = recordingDevice;
             _logger = logger;
             _sampleRate = sampleRate;
             _channels = channels;
+            _deadAirLengthSecs = deadAirLengthSecs;
         }
 
         public static List<RecordingDevice> GetAvailableRecordingDevices()
@@ -68,7 +70,6 @@ namespace song_id
                     for (int i = 0; i < Buffer.Length; i++) { Buffer[i] = Buffer[i]; }
                     //waveFileWriter?.Write(Buffer, Length);
                     sampleProvider.Write(Buffer, Length);
-
                 };
 
                 audioRecorder.Start();
@@ -83,10 +84,10 @@ namespace song_id
                         //don't start analyzing until there is at least a second of audio recorded
                         while (sampleProvider.BufferedDuration.TotalSeconds < 1)
                         {
-                            if (cancellationToken.IsCancellationRequested || _recordingSourceChangedToken.IsRecordingSourceChanged || DateTime.Now - lastNoiseDetected > new TimeSpan(0, 0, 10))
+                            if (cancellationToken.IsCancellationRequested || _recordingSourceChangedToken.IsRecordingSourceChanged || DateTime.Now - lastNoiseDetected > new TimeSpan(0, 0, _deadAirLengthSecs))
                             {
                                 Debug.WriteLine($"Cancel Request: {cancellationToken.IsCancellationRequested}, Recording Source Changed: {_recordingSourceChangedToken.IsRecordingSourceChanged}, Dead air length: {DateTime.Now - lastNoiseDetected}");
-                                return new ShazamResult { Success = false };
+                                return new ShazamResult { Success = false, Title = "Dead Air" };
                             }
 
                             await Task.Delay(100, cancellationToken);
