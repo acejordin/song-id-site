@@ -20,6 +20,7 @@ https://stackoverflow.com/questions/13793514/monodevelop-naudio-ubuntu-linux-tel
 https://medium.com/@niteshsinghal85/using-channels-for-asynchronous-queuing-in-c-ed96c51d4576
 https://learn.microsoft.com/en-us/dotnet/core/docker/build-container?tabs=windows&pivots=dotnet-8-0
 https://devblogs.microsoft.com/dotnet/improving-multiplatform-container-support/
+https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows
 
 ### Open issues
 
@@ -59,10 +60,14 @@ https://devblogs.microsoft.com/dotnet/improving-multiplatform-container-support/
     * http://recordpi.local:8000//admin/metadata?mount=/mystream&mode=updinfo&song=ACDC+Back+In+Black
     * Basic Authentication header needed
 
+* Figure out how to configure icecast secrets outside of development environment via secrets.json
+  * https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows
+
 ### Install Steps (WORK IN PROGRESS)
 1. Install Docker on Raspberry Pi
 	* https://docs.docker.com/engine/install/debian/ (For 64-bit Raspberry Pi OS)
 2. Download the Docker Image TODO
+1. Set up icecast secrets TODO
 1. Modify Docker Compose template variables TODO
 1. Use Docker Compose template to run the container TODO
 1. Browse to site TODO

@@ -1,5 +1,4 @@
 using song_id;
-using song_id_site;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +8,7 @@ builder.Services.AddServerSideBlazor();
 
 //bind config section with strongly typed class
 builder.Services.Configure<SongIdServiceOptions>(builder.Configuration.GetSection(nameof(SongIdServiceOptions)));
+builder.Services.Configure<SongIdServiceIceCastSecrets>(builder.Configuration.GetSection("SongIdServiceOptions:IceCast"));
 //add SongIdService as a singleton for injection
 builder.Services.AddSingleton<SongIdService>();
 //also add that same SongIdService as a hosted service because it's also a BackgroundService

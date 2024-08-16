@@ -21,7 +21,7 @@ namespace song_id
             set { _recordingDevice = new RecordingDevice(value); _recordingSourceChangedToken.IsRecordingSourceChanged = true; }
         }
 
-        public SongId(RecordingDevice recordingDevice, ILogger logger, int sampleRate = 16000, int channels = 1, int deadAirLengthSecs = 10)
+        public SongId(RecordingDevice recordingDevice, ILogger logger, int deadAirLengthSecs, int sampleRate = 16000, int channels = 1)
         {
             _recordingDevice = recordingDevice;
             _logger = logger;
@@ -55,7 +55,7 @@ namespace song_id
                     //Debug.WriteLine($"DataAvailable() called");
                     float agg = Buffer.Aggregate((acc, x) => acc + x);
                     float avg = agg / Buffer.Length;
-                    Debug.WriteLine($"Buffer average noise: {avg:0.###############}");
+                    //Debug.WriteLine($"Buffer average noise: {avg:0.###############}");
 
                     if (avg >= 0.000001 || avg <= -0.000001)
                     {
@@ -84,6 +84,7 @@ namespace song_id
                         //don't start analyzing until there is at least a second of audio recorded
                         while (sampleProvider.BufferedDuration.TotalSeconds < 1)
                         {
+                            Debug.WriteLine($"BufferedDuration.TotalSeconds: {sampleProvider.BufferedDuration.TotalSeconds}");
                             if (cancellationToken.IsCancellationRequested || _recordingSourceChangedToken.IsRecordingSourceChanged || DateTime.Now - lastNoiseDetected > new TimeSpan(0, 0, _deadAirLengthSecs))
                             {
                                 Debug.WriteLine($"Cancel Request: {cancellationToken.IsCancellationRequested}, Recording Source Changed: {_recordingSourceChangedToken.IsRecordingSourceChanged}, Dead air length: {DateTime.Now - lastNoiseDetected}");

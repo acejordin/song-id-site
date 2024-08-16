@@ -8,6 +8,7 @@ namespace song_id
     {
         private readonly ILogger<SongIdService> _logger;
         private SongId _songId;
+        private IceCast _iceCast;
 
         public ShazamResult NowPlaying { get; private set; } = new ShazamResult { Title = "Dead Air" };
 
@@ -15,10 +16,11 @@ namespace song_id
 
         public SongId SongId { get { return _songId; } }
 
-        public SongIdService(ILogger<SongIdService> logger, IOptions<SongIdServiceOptions> options)
+        public SongIdService(ILogger<SongIdService> logger, IOptions<SongIdServiceOptions> options, IOptions<SongIdServiceIceCastSecrets> iceCastSecrets)
         {
             _logger = logger;
             _songId = new SongId(new RecordingDevice(options.Value.RecordingDeviceName), logger, options.Value.DeadAirLengthSecs);
+            _iceCast = new IceCast(logger, options, iceCastSecrets);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -27,13 +29,14 @@ namespace song_id
             {
                 RecordingSourceChangedToken recordingSourceChangedToken = new RecordingSourceChangedToken();
 
-                var result = await _songId.CaptureAndTagAsync(stoppingToken, recordingSourceChangedToken);
+                var shazamResult = await _songId.CaptureAndTagAsync(stoppingToken, recordingSourceChangedToken);
 
-                if (result.Success && result.Title != NowPlaying.Title) _logger.LogInformation($"New track! {result}");
-                else if(!result.Success) _logger.LogError($"Failed Shazam request {result}");
+                if (shazamResult.Success && shazamResult.Title != NowPlaying.Title) _logger.LogInformation($"New track! {shazamResult}");
+                else if(!shazamResult.Success) _logger.LogError($"Failed Shazam request {shazamResult}");
 
-                NowPlaying = result;
+                NowPlaying = shazamResult;
                 SongChanged?.Invoke();
+                _iceCast.UpdateIceCastMetadata(shazamResult);
 
                 //if recording source has changed, then skip waiting to speed things up
                 if (!recordingSourceChangedToken.IsRecordingSourceChanged)
