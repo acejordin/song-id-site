@@ -12,12 +12,12 @@ namespace song_id
         private readonly ILogger _logger;
         private int _sampleRate;
         private int _channels;
-        private bool _recordingSourceChanged = false;
+        private RecordingSourceChangedToken _recordingSourceChangedToken;
 
         public string RecordingDeviceName 
         { 
             get { return _recordingDevice.ToString(); } 
-            set { _recordingDevice = new RecordingDevice(value); _recordingSourceChanged = true; }
+            set { _recordingDevice = new RecordingDevice(value); _recordingSourceChangedToken.IsRecordingSourceChanged = true; }
         }
 
         public SongId(RecordingDevice recordingDevice, ILogger logger, int sampleRate = 16000, int channels = 1)
@@ -33,8 +33,9 @@ namespace song_id
             return RecordingDevice.Enumerate().ToList();
         }
 
-        public async Task<ShazamResult> CaptureAndTagAsync(CancellationToken cancellationToken = default)
+        public async Task<ShazamResult> CaptureAndTagAsync(CancellationToken cancellationToken = default, RecordingSourceChangedToken recordingSourceChangedToken = default)
         {
+            _recordingSourceChangedToken = recordingSourceChangedToken;
             var analysis = new Analysis();
             var finder = new LandmarkFinder(analysis);
 
@@ -45,6 +46,7 @@ namespace song_id
             //using (WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), WaveFormat.CreateIeeeFloat(_sampleRate, _channels)))
             using (AudioRecorder audioRecorder = new AudioRecorder(_recordingDevice, _sampleRate, _channels))
             {
+                DateTime lastNoiseDetected = DateTime.Now;
                 SampleProvider sampleProvider = new SampleProvider();
                 audioRecorder.DataAvailable += (Buffer, Length) =>
                 {
@@ -53,17 +55,20 @@ namespace song_id
                     float avg = agg / Buffer.Length;
                     Debug.WriteLine($"Buffer average noise: {avg:0.###############}");
 
-                    if (avg < 0.000001 && avg > -0.000001)
+                    if (avg >= 0.000001 || avg <= -0.000001)
                     {
-                        Debug.WriteLine($"Think it's dead air");
+                        lastNoiseDetected = DateTime.Now;
                     }
                     else
                     {
-                        Debug.WriteLine("Calling sampleProvider.Write()");
-                        for (int i = 0; i < Buffer.Length; i++) { Buffer[i] = Buffer[i]; }
-                        //waveFileWriter?.Write(Buffer, Length);
-                        sampleProvider.Write(Buffer, Length);
+                        Debug.WriteLine($"Think it's dead air");
                     }
+
+                    Debug.WriteLine("Calling sampleProvider.Write()");
+                    for (int i = 0; i < Buffer.Length; i++) { Buffer[i] = Buffer[i]; }
+                    //waveFileWriter?.Write(Buffer, Length);
+                    sampleProvider.Write(Buffer, Length);
+
                 };
 
                 audioRecorder.Start();
@@ -78,10 +83,9 @@ namespace song_id
                         //don't start analyzing until there is at least a second of audio recorded
                         while (sampleProvider.BufferedDuration.TotalSeconds < 1)
                         {
-                            if (cancellationToken.IsCancellationRequested || _recordingSourceChanged)
+                            if (cancellationToken.IsCancellationRequested || _recordingSourceChangedToken.IsRecordingSourceChanged || DateTime.Now - lastNoiseDetected > new TimeSpan(0, 0, 10))
                             {
-                                Debug.WriteLine($"Cancel Request: {cancellationToken.IsCancellationRequested}, Recording Source Changed: {_recordingSourceChanged}");
-                                _recordingSourceChanged = false;
+                                Debug.WriteLine($"Cancel Request: {cancellationToken.IsCancellationRequested}, Recording Source Changed: {_recordingSourceChangedToken.IsRecordingSourceChanged}, Dead air length: {DateTime.Now - lastNoiseDetected}");
                                 return new ShazamResult { Success = false };
                             }
 

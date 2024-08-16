@@ -10,7 +10,7 @@
 <div><h3>@songIdService.NowPlaying.Title - @songIdService.NowPlaying.Artist</h3></div>
 <div><img src="@songIdService.NowPlaying.ImageUrl" alt="" /></div>
 <div><a href="@songIdService.NowPlaying.Url">Shazam Link</a></div>
-<div>Detected Time: @songIdService.NowPlaying.DetectedTime</div>
+<div>Detected Time: @songIdService.NowPlaying.DetectedTime.ToLocalTime()</div>
 
 @code {
     Action? refreshNowPlaying;
