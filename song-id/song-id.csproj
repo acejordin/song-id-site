@@ -7,9 +7,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+  <Target Name="CopyCustomContentBuild" AfterTargets="Build">
+    <Message  Importance="High" Text="AfterTargets=Build fired" />
     <Copy SourceFiles="..\lib\bassdlls\x86\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
     <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
+    <Copy SourceFiles="..\lib\bassdlls\x86\libbass.so" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x64\libbass.so" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
+  </Target>
+
+  <Target Name="CopyCustomContentPublish" BeforeTargets="Publish">
+    <Message  Importance="High" Text="AfterTargets=Publish fired" />
+    <Copy SourceFiles="..\lib\bassdlls\x86\bass.dll" DestinationFolder="$(PublishDir)" Condition=" '$(Platform)' == 'x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(PublishDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
+    <Copy SourceFiles="..\lib\bassdlls\x86\libbass.so" DestinationFolder="$(PublishDir)" Condition=" '$(Platform)' == 'x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x64\libbass.so" DestinationFolder="$(PublishDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
   </Target>
 
   <ItemGroup>

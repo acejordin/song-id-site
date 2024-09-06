@@ -63,6 +63,40 @@ https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetco
 * Figure out how to configure icecast secrets outside of development environment via secrets.json
   * https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows
 
+### Docker Info
+
+Info on how to turn this is turned into a docker image, and how to update, test etc using docker
+
+[Gitea Contain Registry](https://docs.gitea.com/usage/packages/container)
+[Building Dockerfile from cmd line](https://stackoverflow.com/questions/66146088/docker-gets-error-failed-to-compute-cache-key-not-found-runs-fine-in-visual)
+[Gitea 'unexpected status from PUT request 404 not found' error during PUSH](https://github.com/go-gitea/gitea/issues/31861) add `--provenance=false` to build command
+
+`docker login gitea.example.com`
+
+`docker build -f "C:\Users\acejo\repos\song-id-site\song-id-site\Dockerfile" --force-rm -t songidsite:dev --target base  --build-arg "BUILD_CONFIGURATION=Debug" --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=song-id-site" "C:\Users\acejo\repos\song-id-site"`
+`docker login`
+`docker tag songidsite:dev acejordin/songidsite:dev`
+`docker push/pull acejordin/songidsite:dev`
+
+So unfortunately DarkIce and song-id-site cannot share the ALSA input on the raspberry pi, only one can use it at a time. One solution is a 'mixer' application [pulseaudio](https://www.freedesktop.org/wiki/Software/PulseAudio/). 
+But it's a pain to set up. What I did to get it sorta working for later cleanup
+
+Dockerfile installs pulseaudio via apt-get, and others (necessary?)
+
+this link goes over how to get sound working in a container [Container sound: ALSA or Pulseaudio](https://github.com/mviereck/x11docker/wiki/Container-sound:-ALSA-or-Pulseaudio).
+I followed the "Pulseaudio with shared socket" section, and converted the docker run command to the docker compose file, only tricky bit was the user param, which is
+defined `--user $(id -u):$(id -g)`, but in compose file is `user: "1000:1000"`.
+
+The other bit was getting DarkIce working with the pulse audio server. Currently it only starts via `~ $ darkice -c darkice.cfg` (running as local user), it normally runs as root
+but that results in 
+
+`ALSA lib pulse.c:242:(pulse_connect) PulseAudio: Unable to connect: Connection refused`
+
+This has to do with how PulseAudio want to work by default: [The Perfect Setup](https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/PerfectSetup/)
+Tried an experiment of adding `root` user to the `audio` group that PulseAudio uses, but that wasn't enough to get DarkIce to run like usual. But the darkice init.d file
+appears to run DarkIce as `nobody` and group `nogroup`. Need to investigate more.
+
+
 ### Install Steps (WORK IN PROGRESS)
 1. Install Docker on Raspberry Pi
 	* https://docs.docker.com/engine/install/debian/ (For 64-bit Raspberry Pi OS)
@@ -71,4 +105,3 @@ https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetco
 1. Modify Docker Compose template variables TODO
 1. Use Docker Compose template to run the container TODO
 1. Browse to site TODO
-

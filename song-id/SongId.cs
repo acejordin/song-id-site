@@ -21,7 +21,7 @@ namespace song_id
             set { _recordingDevice = new RecordingDevice(value); _recordingSourceChangedToken.IsRecordingSourceChanged = true; }
         }
 
-        public SongId(RecordingDevice recordingDevice, ILogger logger, int deadAirLengthSecs, int sampleRate = 16000, int channels = 1)
+        public SongId(RecordingDevice recordingDevice, ILogger logger, int deadAirLengthSecs = 10, int sampleRate = 16000, int channels = 1)
         {
             _recordingDevice = recordingDevice;
             _logger = logger;

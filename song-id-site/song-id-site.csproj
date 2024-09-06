@@ -9,11 +9,28 @@
     <DockerfileRunArguments>-v \\wsl$\Ubuntu\mnt\wslg:/mnt/wslg/</DockerfileRunArguments>
   </PropertyGroup>
 
-  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
-    <Copy SourceFiles=".\lib\bassdlls\x86\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
+  <Target Name="CopyCustomContentBuild" AfterTargets="Build">
+    <Message  Importance="High" Text="AfterTargets=Build fired" />
+    <Copy SourceFiles="..\lib\bassdlls\x86\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
     <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
-    <Copy SourceFiles=".\lib\bassdlls\x86\libbass.so" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x86\libbass.so" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
     <Copy SourceFiles="..\lib\bassdlls\x64\libbass.so" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
+    <Copy SourceFiles="..\lib\bassdlls\aarch64\libbass.so" DestinationFolder="$(OutDir)" Condition="'$(ProcessorArchitecture)' == 'arm64' And '$(Platform)' == 'AnyCPU' " />
+  </Target>
+
+  <Target Name="CopyCustomContentPublish" BeforeTargets="Publish">
+    <Message  Importance="High" Text="AfterTargets=Publish fired, ProcessorArchitecture = $(ProcessorArchitecture), $(RuntimeIdentifier), $(OS), $(Platform), $([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux))) " />
+    <Copy SourceFiles="..\lib\bassdlls\x86\bass.dll" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'win-x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'win-x64' " />
+    <Copy SourceFiles="..\lib\bassdlls\x86\libbass.so" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'linux-x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x64\libbass.so" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'linux-x64' " />
+    <Copy SourceFiles="..\lib\bassdlls\aarch64\libbass.so" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'linux-arm64' " />
+
+    <Copy SourceFiles="..\lib\bassdlls\x86\bass-x86.txt" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'win-x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x64\bass-x64.txt" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'win-x64' " />
+    <Copy SourceFiles="..\lib\bassdlls\x86\libbass-x86.txt" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'linux-x86' " />
+    <Copy SourceFiles="..\lib\bassdlls\x64\libbass-x64.txt" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'linux-x64' " />
+    <Copy SourceFiles="..\lib\bassdlls\aarch64\libass-aarch64.txt" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'linux-arm64' " />
   </Target>
 
   <ItemGroup>

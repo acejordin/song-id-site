@@ -1,0 +1,32 @@
+services:
+  songidsite:
+    build:
+      context: .
+      dockerfile: .\song-id-site\Dockerfile
+      args:
+        - "BUILD_CONFIGURATION=Debug"
+        #- "LAUNCHING_FROM_VS=true"
+      platforms: 
+        - "linux/amd64"
+        - "linux/arm64"
+      tags:
+        - git.paulson.network/acejordin/songidsite:dev
+    image: git.paulson.network/acejordin/songidsite:dev # Optional: Specify the image name
+    network_mode: host
+    privileged: true
+    user: "1000:1000"
+    #ports:
+    #  - "8080:8080" # Optional: Expose ports
+    #devices:
+    #  - /dev/bus/usb:/dev/bus/usb
+    labels:
+      - "com.microsoft.created-by=visual-studio"
+      - "com.microsoft.visual-studio.project-name=BlazorApp1"
+    volumes:
+    #  - /path/to/plex/library:/config
+      - /tmp/pulseaudio.socket:/tmp/pulseaudio.socket
+      - /tmp/pulseaudio.client.conf:/etc/pulse/client.conf
+    restart: always
+    environment:
+      - PULSE_SERVER=unix:/tmp/pulseaudio.socket
+      - PULSE_COOKIE=/tmp/pulseaudio.cookie

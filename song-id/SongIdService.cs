@@ -36,7 +36,7 @@ namespace song_id
 
                 NowPlaying = shazamResult;
                 SongChanged?.Invoke();
-                _iceCast.UpdateIceCastMetadata(shazamResult);
+                //_iceCast.UpdateIceCastMetadata(shazamResult);
 
                 //if recording source has changed, then skip waiting to speed things up
                 if (!recordingSourceChangedToken.IsRecordingSourceChanged)

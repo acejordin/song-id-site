@@ -13,7 +13,7 @@ namespace song_id_test
         {
             //Start playing a song before running test
             //Check that you are passing correct recording device to SongId
-            SongId songId = new SongId(SongId.GetAvailableRecordingDevices()[7], NullLogger<SongIdTests>.Instance);
+            SongId songId = new SongId(SongId.GetAvailableRecordingDevices()[7], NullLogger<SongIdTests>.Instance, 2);
 
             ShazamResult result = await songId.CaptureAndTagAsync(CancellationToken.None);
 
