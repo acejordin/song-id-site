@@ -14,11 +14,14 @@ services:
     image: git.paulson.network/acejordin/songidsite:dev # Optional: Specify the image name
     network_mode: host
     privileged: true
-    user: "1000:1000"
+    user: app #"1000:1000" # comment out when sharing /dev/bus/usb
     #ports:
     #  - "8080:8080" # Optional: Expose ports
-    #devices:
+    devices:
     #  - /dev/bus/usb:/dev/bus/usb
+       - /dev/snd:/dev/snd
+    group_add:
+      - audio
     labels:
       - "com.microsoft.created-by=visual-studio"
       - "com.microsoft.visual-studio.project-name=BlazorApp1"
@@ -26,7 +29,9 @@ services:
     #  - /path/to/plex/library:/config
       - /tmp/pulseaudio.socket:/tmp/pulseaudio.socket
       - /tmp/pulseaudio.client.conf:/etc/pulse/client.conf
+      - /run/user/1000/pipewire-0:/tmp/pipewire-0
     restart: always
     environment:
       - PULSE_SERVER=unix:/tmp/pulseaudio.socket
       - PULSE_COOKIE=/tmp/pulseaudio.cookie
+      - XDG_RUNTIME_DIR=/tmp

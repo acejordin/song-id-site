@@ -19,7 +19,7 @@ namespace song_id
         public SongIdService(ILogger<SongIdService> logger, IOptions<SongIdServiceOptions> options, IOptions<SongIdServiceIceCastSecrets> iceCastSecrets)
         {
             _logger = logger;
-            _songId = new SongId(new RecordingDevice(options.Value.RecordingDeviceName), logger, options.Value.DeadAirLengthSecs);
+            _songId = new SongId(new NetRadio("https://live.ukrp.tv/outreachradio.mp3"), logger, options.Value.DeadAirLengthSecs);
             _iceCast = new IceCast(logger, options, iceCastSecrets);
         }
 

@@ -2,37 +2,41 @@
 
 public class RecordingDevice : IDisposable
 {
-    string _name = "";
+    DeviceInfo _deviceInfo;
 
     public int Index { get; }
-
+    public DeviceInfo DeviceInfo
+    {
+        get { return _deviceInfo; }
+    }
     public RecordingDevice(string name)
     {
         if (!string.IsNullOrEmpty(name))
         {
-            _name = name;
-            Index = RecordingDevice.Enumerate().First(rd => rd._name == name).Index;
+            var recordingDevice = Enumerate().First(rd => rd.ToString() == name);
+            Index = recordingDevice.Index;
+            _deviceInfo = recordingDevice.DeviceInfo;
         }
-        else if (RecordingDevice.Enumerate().Count() > 0)
+        else if (Enumerate().Count() > 0)
         {
-            _name = RecordingDevice.Enumerate().First()._name;
-            Index = 0; //Default o first audio device
+            _deviceInfo = Enumerate().First().DeviceInfo;
+            Index = 0; //Default to first audio device
         }
         else
             throw new Exception("No audio devices enumerated");
     }
 
-    public RecordingDevice(int index, string name)
+    public RecordingDevice(int index, DeviceInfo deviceInfo)
     {
         Index = index;
 
-        _name = name;
+        _deviceInfo = deviceInfo;
     }
 
     public static IEnumerable<RecordingDevice> Enumerate()
     {
         for (int i = 0; Bass.RecordGetDeviceInfo(i, out var info); ++i)
-            yield return new RecordingDevice(i, info.Name);
+            yield return new RecordingDevice(i, info);
     }
 
     public void Dispose()
@@ -41,5 +45,5 @@ public class RecordingDevice : IDisposable
         Bass.RecordFree();
     }
 
-    public override string ToString() => _name;
+    public override string ToString() => $"{_deviceInfo.Name}, Type: {_deviceInfo.Type}, Driver: {_deviceInfo.Driver}, IsDefault: {_deviceInfo.IsDefault}";
 }

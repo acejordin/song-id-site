@@ -4,9 +4,15 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 
 # Install package dependencies, this line must be before the USER command to avoid permission issues with apt-get install command
 RUN apt-get update -y && \
-    apt-get install -y pulseaudio && \
+    #apt-get install -y pulseaudio && \
+    #apt-get install -y pipewire && \
+    #apt-get install -y pipewire-alsa && \
+    #apt-get install pipewire-audio-client-libraries && \
+    #apt-get install -y libsdl2-dev && \
     apt-get install -y alsa-utils && \
-    apt-get install -y libsdl2-dev && \
+    #apt-get install -y libasound2-dev && \
+    #apt-get install -y alsa-lib && \
+    #apt-get install -y alsa-plugins && \
     apt-get clean
 
 # USER app
@@ -33,5 +39,8 @@ RUN dotnet publish "./song-id-site.csproj" -a $TARGETARCH -c $BUILD_CONFIGURATIO
 
 FROM base AS final
 WORKDIR /app
+COPY ["lib/.asoundrc", "/root/.asoundrc"]
+COPY ["lib/.asoundrc", "/home/app/.asoundrc"]
+COPY ["lib/.asoundrc", "/home/alec/.asoundrc"]
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "song-id-site.dll"]

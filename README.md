@@ -85,7 +85,7 @@ Dockerfile installs pulseaudio via apt-get, and others (necessary?)
 
 this link goes over how to get sound working in a container [Container sound: ALSA or Pulseaudio](https://github.com/mviereck/x11docker/wiki/Container-sound:-ALSA-or-Pulseaudio).
 I followed the "Pulseaudio with shared socket" section, and converted the docker run command to the docker compose file, only tricky bit was the user param, which is
-defined `--user $(id -u):$(id -g)`, but in compose file is `user: "1000:1000"`.
+defined `--user $(id -u):$(id -g)`, but in compose file is `user: "1000:1000"`. (Is priviledged mode still necessary?)
 
 The other bit was getting DarkIce working with the pulse audio server. Currently it only starts via `~ $ darkice -c darkice.cfg` (running as local user), it normally runs as root
 but that results in 
@@ -95,6 +95,39 @@ but that results in
 This has to do with how PulseAudio want to work by default: [The Perfect Setup](https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/PerfectSetup/)
 Tried an experiment of adding `root` user to the `audio` group that PulseAudio uses, but that wasn't enough to get DarkIce to run like usual. But the darkice init.d file
 appears to run DarkIce as `nobody` and group `nogroup`. Need to investigate more.
+
+[Pipewire in a container](https://stackoverflow.com/a/75775875/454437)
+
+[ALSA Exposed](https://rendaw.gitlab.io/blog/2125f09a85f2.html#alsa-exposed)
+
+[ALSA Sharing](https://alsa.opensrc.org/AlsaSharing#The_card_does_not_support_hardware_mixing.2C_but_all_processes_accessing_it_run_applications_that_use_the_ALSA_library)
+
+[ALSA Project](https://www.alsa-project.org/alsa-doc/alsa-lib/pcm_plugins.html)
+
+[Asoundrc](https://www.alsa-project.org/main/index.php/Asoundrc#dsnoop)
+
+NEW PLAN:
+
+Get DarkIce/IceCast working in same docker container as song-id-site. Alsa should share input audio within a docker container
+
+Notes for putting DarkIce/IceCast into a container:
+
+- Build for arm64 platform
+- `docker buildx build --tag git.paulson.network/acejordin/recordpi:dev . --platform=linux/arm64 --provenance=false`
+- Push to repo
+- `docker push git.paulson.network/acejordin/recordpi:dev1`
+- From SSH on Pi
+- `sudo docker pull git.paulson.network/acejordin/recordpi:dev`
+- `sudo docker run --privileged -p 8888:8000 -it git.paulson.network/acejordin/recordpi:dev`
+
+
+
+TODO:
+- figure out darkice, run as local user? as root? pros/cons?
+- figure out exactly what needs to be installed for pulseaudio support
+  - installed on raspi and in docker. was it already installed on rpi? what apt-get's are exactly needed for dockerfile?
+  - research the container sound approach to understand it better
+  - research the user `1000:1000` in the docker compose to understand better
 
 
 ### Install Steps (WORK IN PROGRESS)
