@@ -1,25 +1,15 @@
-﻿using ManagedBass;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using System.IO;
 
 namespace song_id
 {
     public class SongId
     {
         private IAudioSource _audioSource;
-        private RecordingDevice _recordingDevice;
         private readonly ILogger _logger;
         private int _sampleRate;
         private int _channels;
-        private RecordingSourceChangedToken _recordingSourceChangedToken;
         private int _deadAirLengthSecs;
-
-        public string RecordingDeviceName 
-        { 
-            get { return _recordingDevice.ToString(); } 
-            set { _recordingDevice = new RecordingDevice(value); _recordingSourceChangedToken.IsRecordingSourceChanged = true; }
-        }
 
         //public SongId(RecordingDevice recordingDevice, ILogger logger, int deadAirLengthSecs = 10, int sampleRate = 16000, int channels = 1)
         //{
@@ -37,14 +27,8 @@ namespace song_id
             _deadAirLengthSecs = deadAirLengthSecs;
         }
 
-        public static List<RecordingDevice> GetAvailableRecordingDevices()
+        public async Task<ShazamResult> CaptureAndTagAsync(CancellationToken cancellationToken = default)
         {
-            return RecordingDevice.Enumerate().ToList();
-        }
-
-        public async Task<ShazamResult> CaptureAndTagAsync(CancellationToken cancellationToken = default, RecordingSourceChangedToken recordingSourceChangedToken = default)
-        {
-            _recordingSourceChangedToken = recordingSourceChangedToken;
             var analysis = new Analysis();
             var finder = new LandmarkFinder(analysis);
 
@@ -93,9 +77,9 @@ namespace song_id
                     while (sampleProvider.BufferedDuration.TotalSeconds < 1)
                     {
                         Debug.WriteLine($"BufferedDuration.TotalSeconds: {sampleProvider.BufferedDuration.TotalSeconds}");
-                        if (cancellationToken.IsCancellationRequested || _recordingSourceChangedToken.IsRecordingSourceChanged || DateTime.Now - lastNoiseDetected > new TimeSpan(0, 0, _deadAirLengthSecs))
+                        if (cancellationToken.IsCancellationRequested || DateTime.Now - lastNoiseDetected > new TimeSpan(0, 0, _deadAirLengthSecs))
                         {
-                            Debug.WriteLine($"Cancel Request: {cancellationToken.IsCancellationRequested}, Recording Source Changed: {_recordingSourceChangedToken.IsRecordingSourceChanged}, Dead air length: {DateTime.Now - lastNoiseDetected}");
+                            Debug.WriteLine($"Cancel Request: {cancellationToken.IsCancellationRequested}, Dead air length: {DateTime.Now - lastNoiseDetected}");
                             return new ShazamResult { Success = false, Title = "Dead Air" };
                         }
 

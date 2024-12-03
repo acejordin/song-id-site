@@ -1,7 +1,4 @@
-﻿using ManagedBass;
-using System.IO;
-
-namespace song_id
+﻿namespace song_id
 {
     public class NetRadio : IAudioSource, IDisposable
     {
@@ -9,19 +6,19 @@ namespace song_id
         {
             Url = url;
 
-            Bass.Init(0); //init to 0/"no sound" device, since we're decoding, not playing the music
-            Bass.Configure(Configuration.NetBufferLength, 2000); //set stream buffer size to 2 seconds
-            Bass.Configure(Configuration.NetPreBuffer, 0); //PreBuffer percent to zero so we can start accessing the buffer sooner
+            //Bass.Init(0); //init to 0/"no sound" device, since we're decoding, not playing the music
+            //Bass.Configure(Configuration.NetBufferLength, 2000); //set stream buffer size to 2 seconds
+            //Bass.Configure(Configuration.NetPreBuffer, 0); //PreBuffer percent to zero so we can start accessing the buffer sooner
 
-            //Open the stream, set Decode and Float flags, decode so we can read the data without playing it, and Float to get the data as float values instead of bytes, which is needed
-            //for song identification
-            Stream = Bass.CreateStream(Url, 0, BassFlags.Decode | BassFlags.Float | BassFlags.Mono, null, IntPtr.Zero);
+            ////Open the stream, set Decode and Float flags, decode so we can read the data without playing it, and Float to get the data as float values instead of bytes, which is needed
+            ////for song identification
+            //Stream = Bass.CreateStream(Url, 0, BassFlags.Decode | BassFlags.Float | BassFlags.Mono, null, IntPtr.Zero);
 
-            Bass.ChannelSetSync(Stream, SyncFlags.End, 0, EndSync);
+            //Bass.ChannelSetSync(Stream, SyncFlags.End, 0, EndSync);
 
-            ChannelInfo info = Bass.ChannelGetInfo(Stream);
-            Channels = info.Channels;
-            SampleRate = info.Frequency;
+            //ChannelInfo info = Bass.ChannelGetInfo(Stream);
+            //Channels = info.Channels;
+            //SampleRate = info.Frequency;
         }
 
         public string Url { get; } = string.Empty;
@@ -52,38 +49,38 @@ namespace song_id
 
                 while (true)
                 {
-                    long bufferPos = Bass.StreamGetFilePosition(Stream, FileStreamPosition.Buffer);
-                    long endPos = Bass.StreamGetFilePosition(Stream, FileStreamPosition.End);
-                    var progress = Bass.StreamGetFilePosition(Stream, FileStreamPosition.Buffer) * 100 / Bass.StreamGetFilePosition(Stream, FileStreamPosition.End);
+                    //long bufferPos = Bass.StreamGetFilePosition(Stream, FileStreamPosition.Buffer);
+                    //long endPos = Bass.StreamGetFilePosition(Stream, FileStreamPosition.End);
+                    //var progress = Bass.StreamGetFilePosition(Stream, FileStreamPosition.Buffer) * 100 / Bass.StreamGetFilePosition(Stream, FileStreamPosition.End);
 
-                    double bufferLengthSecs = Bass.ChannelBytes2Seconds(Stream, Bass.StreamGetFilePosition(Stream, FileStreamPosition.Buffer));
-                    //Console.WriteLine($"buffer:{bufferPos},end:{endPos},bufferSecs:{bufferLengthSecs},%:{progress}");
+                    //double bufferLengthSecs = Bass.ChannelBytes2Seconds(Stream, Bass.StreamGetFilePosition(Stream, FileStreamPosition.Buffer));
+                    ////Console.WriteLine($"buffer:{bufferPos},end:{endPos},bufferSecs:{bufferLengthSecs},%:{progress}");
 
-                    if (Bass.StreamGetFilePosition(Stream, FileStreamPosition.Connected) == 1) //check we're still connected to the station
-                    {
-                        //++iterations;
-                        //Console.WriteLine($"buffer:{bufferPos},end:{endPos},bufferSecs:{bufferLengthSecs},%:{progress}");
+                    //if (Bass.StreamGetFilePosition(Stream, FileStreamPosition.Connected) == 1) //check we're still connected to the station
+                    //{
+                    //    //++iterations;
+                    //    //Console.WriteLine($"buffer:{bufferPos},end:{endPos},bufferSecs:{bufferLengthSecs},%:{progress}");
 
-                        length = (int)Bass.StreamGetFilePosition(Stream, FileStreamPosition.Buffer); //get how much buffered data is available
-                                                                                                     //length = 10000;
-                        buffer = new float[length];
-                        length = Bass.ChannelGetData(Stream, buffer, length); //get available data from buffer
+                    //    length = (int)Bass.StreamGetFilePosition(Stream, FileStreamPosition.Buffer); //get how much buffered data is available
+                    //                                                                                 //length = 10000;
+                    //    buffer = new float[length];
+                    //    length = Bass.ChannelGetData(Stream, buffer, length); //get available data from buffer
 
-                        //waveFileWriter.Write(buffer, length); //write data to wav file
-                        DataAvailable?.Invoke(buffer, length);
+                    //    //waveFileWriter.Write(buffer, length); //write data to wav file
+                    //    DataAvailable?.Invoke(buffer, length);
 
-                        //Console.WriteLine($"Read {length} bytes, iteration:{iterations}");
+                    //    //Console.WriteLine($"Read {length} bytes, iteration:{iterations}");
 
-                        if (length < endPos) //if buffer wasn't full, slow down a beat
-                            Thread.Sleep(500);
-                    }
+                    //    if (length < endPos) //if buffer wasn't full, slow down a beat
+                    //        Thread.Sleep(500);
+                    //}
                 }
             });
         }
 
         public void Stop()
         {
-            Bass.StreamFree(Stream);
+            //Bass.StreamFree(Stream);
         }
 
         void EndSync(int Handle, int Channel, int Data, IntPtr User)

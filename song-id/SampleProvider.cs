@@ -1,4 +1,4 @@
-﻿using ManagedBass;
+﻿using NAudio.Wave;
 
 /// <summary>
 /// Like IWaveProvider, but makes it much simpler to put together a 32 bit floating

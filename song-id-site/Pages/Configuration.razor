@@ -7,7 +7,7 @@
 <h3>Configuration</h3>
 
 <fieldset>
-    <InputRadioGroup @bind-Value="songIdService.SongId.RecordingDeviceName">
+    @* <InputRadioGroup @bind-Value="songIdService.SongId.RecordingDeviceName">
         <legend>Select Recording Device:</legend>
         @foreach (var device in SongId.GetAvailableRecordingDevices())
         {
@@ -18,7 +18,7 @@
                 </label>
             </div>
         }
-    </InputRadioGroup>
+    </InputRadioGroup> *@
 </fieldset>
 
 @* <button class="btn btn-primary" @onclick="SaveDefaultDevice">Make Default Device</button> *@

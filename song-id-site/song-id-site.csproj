@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>fec08348-dd09-48f8-b60d-76d920a5da28</UserSecretsId>
@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <Target Name="CopyCustomContentBuild" AfterTargets="Build">
-    <Message  Importance="High" Text="AfterTargets=Build fired" />
+    <Message Importance="High" Text="AfterTargets=Build fired" />
     <Copy SourceFiles="..\lib\bassdlls\x86\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
     <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
     <Copy SourceFiles="..\lib\bassdlls\x86\libbass.so" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
@@ -19,7 +19,7 @@
   </Target>
 
   <Target Name="CopyCustomContentPublish" BeforeTargets="Publish">
-    <Message  Importance="High" Text="AfterTargets=Publish fired, ProcessorArchitecture = $(ProcessorArchitecture), $(RuntimeIdentifier), $(OS), $(Platform), $([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux))) " />
+    <Message Importance="High" Text="AfterTargets=Publish fired, ProcessorArchitecture = $(ProcessorArchitecture), $(RuntimeIdentifier), $(OS), $(Platform), $([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux))) " />
     <Copy SourceFiles="..\lib\bassdlls\x86\bass.dll" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'win-x86' " />
     <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'win-x64' " />
     <Copy SourceFiles="..\lib\bassdlls\x86\libbass.so" DestinationFolder="$(PublishDir)" Condition=" '$(RuntimeIdentifier)' == 'linux-x86' " />

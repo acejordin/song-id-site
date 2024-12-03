@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>song_id</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <Target Name="CopyCustomContentBuild" AfterTargets="Build">
-    <Message  Importance="High" Text="AfterTargets=Build fired" />
+    <Message Importance="High" Text="AfterTargets=Build fired" />
     <Copy SourceFiles="..\lib\bassdlls\x86\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
     <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
     <Copy SourceFiles="..\lib\bassdlls\x86\libbass.so" DestinationFolder="$(OutDir)" Condition=" '$(Platform)' == 'x86' " />
@@ -16,7 +16,7 @@
   </Target>
 
   <Target Name="CopyCustomContentPublish" BeforeTargets="Publish">
-    <Message  Importance="High" Text="AfterTargets=Publish fired" />
+    <Message Importance="High" Text="AfterTargets=Publish fired" />
     <Copy SourceFiles="..\lib\bassdlls\x86\bass.dll" DestinationFolder="$(PublishDir)" Condition=" '$(Platform)' == 'x86' " />
     <Copy SourceFiles="..\lib\bassdlls\x64\bass.dll" DestinationFolder="$(PublishDir)" Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU' " />
     <Copy SourceFiles="..\lib\bassdlls\x86\libbass.so" DestinationFolder="$(PublishDir)" Condition=" '$(Platform)' == 'x86' " />
@@ -25,12 +25,13 @@
 
   <ItemGroup>
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
-    <PackageReference Include="ManagedBass" Version="3.1.1" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NLayer.NAudioSupport" Version="1.4.0" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
   </ItemGroup>
 

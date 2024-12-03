@@ -1,5 +1,4 @@
-﻿using ManagedBass;
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 //using NAudio.Wave;
 using System;
 using System.Diagnostics;
@@ -9,13 +8,13 @@ using System.Threading.Channels;
 
 class Program
 {
-    static IEnumerable<MMDevice> CaptureDevices { get; set; }
+    //static IEnumerable<MMDevice> CaptureDevices { get; set; }
 
     static void Main(string[] args)
     {
-        Bass.Init(0); //init to 0/"no sound" device, since we're decoding, not playing the music
-        Bass.Configure(Configuration.NetBufferLength, 2000); //set stream buffer size to 2 seconds
-        Bass.Configure(Configuration.NetPreBuffer, 0); //PreBuffer percent to zero so we can start accessing the buffer sooner
+        //Bass.Init(0); //init to 0/"no sound" device, since we're decoding, not playing the music
+        //Bass.Configure(Configuration.NetBufferLength, 2000); //set stream buffer size to 2 seconds
+        //Bass.Configure(Configuration.NetPreBuffer, 0); //PreBuffer percent to zero so we can start accessing the buffer sooner
 
         //var file = new FileStream("afile.mp3", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
         //byte[] _buffer = new byte[0];
@@ -42,64 +41,64 @@ class Program
         //    Console.WriteLine("Downloaded() called");
         //}
 
-        Task.Factory.StartNew(() =>
-        {
-            Console.WriteLine("Opening stream...");
-            //Open the stream, set Decode and Float flags, decode so we can read the data without playing it, and Float to get the data as float values instead of bytes, which is needed
-            //for song identification
-            var stream = Bass.CreateStream("https://live.ukrp.tv/outreachradio.mp3", 0, BassFlags.Decode | BassFlags.Float | BassFlags.Mono, null, IntPtr.Zero);
+        //Task.Factory.StartNew(() =>
+        //{
+        //    Console.WriteLine("Opening stream...");
+        //    //Open the stream, set Decode and Float flags, decode so we can read the data without playing it, and Float to get the data as float values instead of bytes, which is needed
+        //    //for song identification
+        //    var stream = Bass.CreateStream("https://live.ukrp.tv/outreachradio.mp3", 0, BassFlags.Decode | BassFlags.Float | BassFlags.Mono, null, IntPtr.Zero);
 
-            Bass.ChannelSetSync(stream, SyncFlags.End, 0, EndSync);
+        //    Bass.ChannelSetSync(stream, SyncFlags.End, 0, EndSync);
 
-            //Bass.ChannelSetSync(stream, SyncFlags.Downloaded, 0, Downloaded);
+        //    //Bass.ChannelSetSync(stream, SyncFlags.Downloaded, 0, Downloaded);
 
-            //Bass.ChannelPlay(stream);
+        //    //Bass.ChannelPlay(stream);
 
-            int length;
-            float[] buffer;
+        //    int length;
+        //    float[] buffer;
 
-            var filePath = Path.Combine(".", DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".wav");
-            WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), WaveFormat.FromChannel(stream));
+        //    var filePath = Path.Combine(".", DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".wav");
+        //    WaveFileWriter waveFileWriter = new WaveFileWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read), WaveFormat.FromChannel(stream));
 
-            int iterations = 0;
+        //    int iterations = 0;
 
-            while (true)
-            {
-                long bufferPos = Bass.StreamGetFilePosition(stream, FileStreamPosition.Buffer);
-                long endPos = Bass.StreamGetFilePosition(stream, FileStreamPosition.End);
-                var progress = Bass.StreamGetFilePosition(stream, FileStreamPosition.Buffer) * 100 / Bass.StreamGetFilePosition(stream, FileStreamPosition.End);
+        //    while (true)
+        //    {
+        //        long bufferPos = Bass.StreamGetFilePosition(stream, FileStreamPosition.Buffer);
+        //        long endPos = Bass.StreamGetFilePosition(stream, FileStreamPosition.End);
+        //        var progress = Bass.StreamGetFilePosition(stream, FileStreamPosition.Buffer) * 100 / Bass.StreamGetFilePosition(stream, FileStreamPosition.End);
 
-                ChannelInfo info = Bass.ChannelGetInfo(stream);
-                double bufferLengthSecs = Bass.ChannelBytes2Seconds(stream, Bass.StreamGetFilePosition(stream, FileStreamPosition.Buffer));
-                Console.WriteLine($"buffer:{bufferPos},end:{endPos},bufferSecs:{bufferLengthSecs},%:{progress}");
+        //        ChannelInfo info = Bass.ChannelGetInfo(stream);
+        //        double bufferLengthSecs = Bass.ChannelBytes2Seconds(stream, Bass.StreamGetFilePosition(stream, FileStreamPosition.Buffer));
+        //        Console.WriteLine($"buffer:{bufferPos},end:{endPos},bufferSecs:{bufferLengthSecs},%:{progress}");
 
-                // (progress >= 100 || Bass.StreamGetFilePosition(stream, FileStreamPosition.Connected) == 0)
-                if (Bass.StreamGetFilePosition(stream, FileStreamPosition.Connected) == 1) //check we're still connected to the station
-                {
-                    ++iterations;
-                    //Console.WriteLine($"buffer:{bufferPos},end:{endPos},bufferSecs:{bufferLengthSecs},%:{progress}");
+        //        // (progress >= 100 || Bass.StreamGetFilePosition(stream, FileStreamPosition.Connected) == 0)
+        //        if (Bass.StreamGetFilePosition(stream, FileStreamPosition.Connected) == 1) //check we're still connected to the station
+        //        {
+        //            ++iterations;
+        //            //Console.WriteLine($"buffer:{bufferPos},end:{endPos},bufferSecs:{bufferLengthSecs},%:{progress}");
 
-                    //length = (int)Bass.ChannelGetLength(stream, PositionFlags.Bytes);
-                    //length = Bass.ChannelGetData(stream, IntPtr.Zero, (int)DataFlags.Available);
-                    length = (int)Bass.StreamGetFilePosition(stream, FileStreamPosition.Buffer); //get how much buffered data is available
-                    //length = 10000;
-                    buffer = new float[length];
-                    length = Bass.ChannelGetData(stream, buffer, length); //get available data from buffer
+        //            //length = (int)Bass.ChannelGetLength(stream, PositionFlags.Bytes);
+        //            //length = Bass.ChannelGetData(stream, IntPtr.Zero, (int)DataFlags.Available);
+        //            length = (int)Bass.StreamGetFilePosition(stream, FileStreamPosition.Buffer); //get how much buffered data is available
+        //            //length = 10000;
+        //            buffer = new float[length];
+        //            length = Bass.ChannelGetData(stream, buffer, length); //get available data from buffer
 
-                    waveFileWriter.Write(buffer, length); //write data to wav file
+        //            waveFileWriter.Write(buffer, length); //write data to wav file
 
-                    Console.WriteLine($"Read {length} bytes, iteration:{iterations}");
+        //            Console.WriteLine($"Read {length} bytes, iteration:{iterations}");
 
-                    if(length < endPos) //if buffer wasn't full, slow down a beat
-                        Thread.Sleep(500);
-                }
-            }
-        });
+        //            if(length < endPos) //if buffer wasn't full, slow down a beat
+        //                Thread.Sleep(500);
+        //        }
+        //    }
+        //});
 
-        void EndSync(int Handle, int Channel, int Data, IntPtr User)
-        {
+        //void EndSync(int Handle, int Channel, int Data, IntPtr User)
+        //{
 
-        }
+        //}
 
         Console.ReadLine();
     }
