@@ -28,12 +28,12 @@ public class SampleProvider : ISampleProvider
     private int _writePostionIdx = 0;
     private int _readPositionIdx = 0;
 
-    private int _averageBytesPerSecond = 44100; //simplified in this case
+    private int _averageBytesPerSecond = 32000; //simplified in this case
 
-    public SampleProvider(int channels, int sampleRate)
+    public SampleProvider()
     {
-        _averageBytesPerSecond = channels * sampleRate;
-        _bufferFloat = new float[_averageBytesPerSecond * 100000]; //20 second buffer
+        //_averageBytesPerSecond = channels * sampleRate;
+        _bufferFloat = new float[_averageBytesPerSecond * 20000]; //20 second buffer
     }
 
     public TimeSpan BufferedDuration
@@ -41,14 +41,14 @@ public class SampleProvider : ISampleProvider
         get
         {
             //This is hard coded to assume the audio stream is 16000hz 32 bit mono.
-            //int channels = 1;
+            int channels = 2;
             //int bitsPerSample = 32;
-            //int sampleRate = 44100;
+            int sampleRate = 16000;
             //short blockAlign = (short)(channels * (bitsPerSample / 8));
-            //short blockAlign = (short)channels;
-            //int averageBytesPerSecond = sampleRate * blockAlign;
+            short blockAlign = (short)channels;
+            int averageBytesPerSecond = sampleRate * blockAlign;
 
-            TimeSpan bufferedDuration = TimeSpan.FromSeconds((_writePostionIdx - _readPositionIdx) / (double)_averageBytesPerSecond);
+            TimeSpan bufferedDuration = TimeSpan.FromSeconds((_writePostionIdx - _readPositionIdx) / (double)averageBytesPerSecond);
             //Trace.WriteLine($"BufferedDuration: {bufferedDuration.TotalSeconds} secs");
             return bufferedDuration;
         }

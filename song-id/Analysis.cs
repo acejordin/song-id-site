@@ -3,7 +3,7 @@ using MathNet.Numerics.IntegralTransforms;
 
 class Analysis
 {
-    public const int SAMPLE_RATE = 16000;
+    public const int SAMPLE_RATE = 32000;
     public const int CHUNKS_PER_SECOND = 125;
     public const int CHUNK_SIZE = SAMPLE_RATE / CHUNKS_PER_SECOND;
     public const int WINDOW_SIZE = CHUNK_SIZE * 16;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NAudio.Wave;
 using System.Diagnostics;
 
 namespace song_id
@@ -7,18 +8,7 @@ namespace song_id
     {
         private IAudioSource _audioSource;
         private readonly ILogger _logger;
-        private int _sampleRate;
-        private int _channels;
         private int _deadAirLengthSecs;
-
-        //public SongId(RecordingDevice recordingDevice, ILogger logger, int deadAirLengthSecs = 10, int sampleRate = 16000, int channels = 1)
-        //{
-        //    _recordingDevice = recordingDevice;
-        //    _logger = logger;
-        //    _sampleRate = sampleRate;
-        //    _channels = channels;
-        //    _deadAirLengthSecs = deadAirLengthSecs;
-        //}
 
         public SongId(IAudioSource audioSource, ILogger logger, int deadAirLengthSecs = 10)
         {
@@ -37,7 +27,8 @@ namespace song_id
             var filePath = Path.Combine(outFolder, DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".wav");
 
             DateTime lastNoiseDetected = DateTime.Now;
-            SampleProvider sampleProvider = new SampleProvider(_audioSource.Channels, _audioSource.SampleRate);
+            //SampleProvider sampleProvider = new SampleProvider();
+            BufferedWaveProvider bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat(16000, 16, 1));
 
             int iterations = 0;
             _audioSource.DataAvailable += (Buffer, Length) =>
@@ -57,10 +48,10 @@ namespace song_id
                     Debug.WriteLine($"Think it's dead air");
                 }
 
-                Debug.WriteLine("Calling sampleProvider.Write()");
+                //Debug.WriteLine("Calling sampleProvider.Write()");
                 //for (int i = 0; i < Buffer.Length; i++) { Buffer[i] = Buffer[i]; }
                 //waveFileWriter?.Write(Buffer, Length);
-                sampleProvider.Write(Buffer, Length);
+                bufferedWaveProvider.AddSamples(Buffer, 0, Length);
             };
 
             _audioSource.Start();
@@ -76,12 +67,12 @@ namespace song_id
                     //don't start analyzing until there is at least a second of audio recorded
                     while (sampleProvider.BufferedDuration.TotalSeconds < 1)
                     {
-                        Debug.WriteLine($"BufferedDuration.TotalSeconds: {sampleProvider.BufferedDuration.TotalSeconds}");
-                        if (cancellationToken.IsCancellationRequested || DateTime.Now - lastNoiseDetected > new TimeSpan(0, 0, _deadAirLengthSecs))
-                        {
-                            Debug.WriteLine($"Cancel Request: {cancellationToken.IsCancellationRequested}, Dead air length: {DateTime.Now - lastNoiseDetected}");
-                            return new ShazamResult { Success = false, Title = "Dead Air" };
-                        }
+                        //Debug.WriteLine($"BufferedDuration.TotalSeconds: {sampleProvider.BufferedDuration.TotalSeconds}");
+                        //if (cancellationToken.IsCancellationRequested || DateTime.Now - lastNoiseDetected > new TimeSpan(0, 0, _deadAirLengthSecs))
+                        //{
+                        //    Debug.WriteLine($"Cancel Request: {cancellationToken.IsCancellationRequested}, Dead air length: {DateTime.Now - lastNoiseDetected}");
+                        //    return new ShazamResult { Success = false, Title = "Dead Air" };
+                        //}
 
                         await Task.Delay(100, cancellationToken);
                     }

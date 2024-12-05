@@ -27,9 +27,7 @@ namespace song_id
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                RecordingSourceChangedToken recordingSourceChangedToken = new RecordingSourceChangedToken();
-
-                var shazamResult = await _songId.CaptureAndTagAsync(stoppingToken, recordingSourceChangedToken);
+                var shazamResult = await _songId.CaptureAndTagAsync(stoppingToken);
 
                 if (shazamResult.Success && shazamResult.Title != NowPlaying.Title) _logger.LogInformation($"New track! {shazamResult}");
                 else if(!shazamResult.Success) _logger.LogError($"Failed Shazam request {shazamResult}");
@@ -37,12 +35,6 @@ namespace song_id
                 NowPlaying = shazamResult;
                 SongChanged?.Invoke();
                 //_iceCast.UpdateIceCastMetadata(shazamResult);
-
-                //if recording source has changed, then skip waiting to speed things up
-                if (!recordingSourceChangedToken.IsRecordingSourceChanged)
-                {
-                    await Task.Delay(10_000, stoppingToken);
-                }
             }
         }
     }
